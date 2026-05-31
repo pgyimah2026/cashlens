@@ -768,6 +768,7 @@
     <div class="header-actions">
       <button class="btn btn-danger" onclick="clearAllData()">⊘ Clear All</button>
       <button class="btn btn-outline" onclick="openImportModal()">⬆ Import</button>
+      <button class="btn btn-outline" id="syncBtn" onclick="syncDashboard()">↻ Sync</button>
       <button class="btn" onclick="openAddModal()">+ Add Entry</button>
       <button class="btn btn-accent" onclick="analyzeWithAI()">✦ AI Analyze</button>
     </div>
@@ -2557,6 +2558,16 @@ function refreshAll() {
   updateAllScenarios();
 }
 
+function syncDashboard() {
+  const btn = document.getElementById('syncBtn');
+  if(btn) { btn.textContent = '↻ Syncing…'; btn.disabled = true; }
+  refreshAll();
+  setTimeout(() => {
+    if(btn) { btn.textContent = '↻ Sync'; btn.disabled = false; }
+    showToast('Dashboard synced', 'success');
+  }, 400);
+}
+
 // ============================================================
 // === FIRST VISIT ===
 // ============================================================
@@ -2776,18 +2787,9 @@ function confirmCsvImport() {
   // Sort by date desc
   transactions.sort((a,b) => b.date.localeCompare(a.date));
   saveTransactions();
-  renderTransactions();
-  updateMetrics();
   closeImportModal();
-
-  // Show quick confirmation in tracker
-  const bar = document.getElementById('warningSummaryBar');
-  const tempMsg = document.createElement('div');
-  tempMsg.className = 'import-status ok';
-  tempMsg.style.cssText = 'margin-bottom:12px;padding:10px 14px;border-radius:10px;font-size:13px';
-  tempMsg.textContent = `✓ Imported ${imported} transactions${skipped ? ` (${skipped} skipped)` : ''} from CSV`;
-  document.getElementById('warningZone').insertAdjacentElement('afterend', tempMsg);
-  setTimeout(() => tempMsg.remove(), 4000);
+  refreshAll();
+  showToast(`Imported ${imported} transaction${imported!==1?'s':''}${skipped ? ` (${skipped} skipped)` : ''} — dashboard synced`, 'success');
 }
 
 function parseFlexDate(str) {
