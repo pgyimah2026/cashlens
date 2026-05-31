@@ -865,19 +865,19 @@
   <div class="forward-controls">
     <div class="control-group">
       <label>Starting Cash</label>
-      <input class="control-input" id="fwdCash" type="number" value="48320" oninput="runForwardModel()">
+      <input class="control-input" id="fwdCash" type="number" value="" placeholder="0" oninput="runForwardModel()">
     </div>
     <div class="control-group">
       <label>Monthly Revenue</label>
-      <input class="control-input" id="fwdRevenue" type="number" value="31450" oninput="runForwardModel()">
+      <input class="control-input" id="fwdRevenue" type="number" value="" placeholder="0" oninput="runForwardModel()">
     </div>
     <div class="control-group">
       <label>Monthly Expenses</label>
-      <input class="control-input" id="fwdExpenses" type="number" value="22180" oninput="runForwardModel()">
+      <input class="control-input" id="fwdExpenses" type="number" value="" placeholder="0" oninput="runForwardModel()">
     </div>
     <div class="control-group">
       <label>Growth Rate %/mo</label>
-      <input class="control-input" id="fwdGrowth" type="number" value="3" step="0.5" oninput="runForwardModel()">
+      <input class="control-input" id="fwdGrowth" type="number" value="" placeholder="0" step="0.5" oninput="runForwardModel()">
     </div>
   </div>
 
@@ -2066,8 +2066,8 @@ function updateScenario(scenario, key, val) {
 function calcScenario(scenario) {
   const s = scenarioState[scenario];
   const baseCash = cashOnHand;
-  const baseRev = parseFloat(document.getElementById('fwdRevenue')?.value) || 31450;
-  const baseExp = parseFloat(document.getElementById('fwdExpenses')?.value) || 22180;
+  const baseRev = parseFloat(document.getElementById('fwdRevenue')?.value) || 0;
+  const baseExp = parseFloat(document.getElementById('fwdExpenses')?.value) || 0;
   const rev = baseRev * (1 + s.rev/100);
   const exp = baseExp * (1 + s.exp/100);
   const net = rev - exp;
@@ -2849,7 +2849,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Restore forward model inputs from cashOnHand
   const fc = document.getElementById('fwdCash');
-  if(fc && cashOnHand > 0 && fc.value==='48320') fc.value = cashOnHand;
+  if(fc && cashOnHand > 0 && !fc.value) fc.value = cashOnHand;
 
   initCharts();
   refreshAll();
