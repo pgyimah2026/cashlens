@@ -141,6 +141,8 @@
     font-weight: 600;
   }
   .btn-accent:hover { background: #00cc8e; }
+  .btn-danger { background: rgba(239,68,68,0.10); color: var(--danger); border-color: rgba(239,68,68,0.28); }
+  .btn-danger:hover { background: rgba(239,68,68,0.20); }
 
   /* === METRIC CARDS === */
   .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
@@ -605,6 +607,7 @@
       <div class="page-sub">Real-time monitoring · Updated just now</div>
     </div>
     <div class="header-actions">
+      <button class="btn btn-danger" onclick="clearAllData()">⊘ Clear All</button>
       <button class="btn btn-outline" onclick="openImportModal()">⬆ Import</button>
       <button class="btn" onclick="openAddModal()">+ Add Entry</button>
       <button class="btn btn-accent" onclick="analyzeWithAI()">✦ AI Analyze</button>
@@ -1687,6 +1690,26 @@ function quickPrompt(text) {
 
 function analyzeWithAI() {
   quickPrompt('Give me a full cash flow health check based on my current numbers and top 3 recommendations.');
+}
+
+// === CLEAR ALL ===
+function clearAllData() {
+  if(!confirm('Reset all transactions and figures to zero? This cannot be undone.')) return;
+  transactions.length = 0;
+  renderTransactions();
+  document.getElementById('cashOnHand').textContent = '$0';
+  document.getElementById('monthlyIn').textContent = '$0';
+  document.getElementById('monthlyOut').textContent = '$0';
+  document.getElementById('netFlow').textContent = '$0';
+  document.getElementById('warningSummaryBar').style.display = 'none';
+  document.getElementById('warningZone').innerHTML = '';
+  dismissedWarnings.clear();
+  document.getElementById('fwdCash').value = 0;
+  document.getElementById('fwdRevenue').value = 0;
+  document.getElementById('fwdExpenses').value = 0;
+  document.getElementById('fwdGrowth').value = 0;
+  runForwardModel();
+  updateAllScenarios();
 }
 
 
