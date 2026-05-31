@@ -768,27 +768,27 @@
   <div class="burn-grid">
     <div class="burn-card">
       <div class="metric-label">Monthly Burn Rate</div>
-      <div class="metric-value danger" style="margin: 8px 0">$22,180</div>
+      <div class="metric-value danger" id="burnMonthlyRate" style="margin: 8px 0">$22,180</div>
       <div class="metric-delta" style="margin-bottom:16px">Gross burn (all expenses)</div>
       <div class="runway-bar-wrap">
         <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px">
-          <span>Net burn: $12,910/mo</span><span>After revenue</span>
+          <span id="burnNetText">Net burn: $12,910/mo</span><span>After revenue</span>
         </div>
-        <div class="runway-bar-bg"><div class="runway-bar-fill" style="width:41%;background:var(--danger)"></div></div>
+        <div class="runway-bar-bg"><div id="burnRatioBar" class="runway-bar-fill" style="width:41%;background:var(--danger)"></div></div>
       </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px">Net burn is 41% of gross burn — healthy ratio</div>
+      <div id="burnRatioText" style="font-size:11px;color:var(--muted);margin-top:8px">Net burn is 41% of gross burn — healthy ratio</div>
     </div>
 
     <div class="burn-card">
       <div class="metric-label">Cash Runway</div>
-      <div class="metric-value" style="margin: 8px 0; color: var(--warn)">3.7 months</div>
+      <div class="metric-value" id="burnRunway" style="margin: 8px 0; color: var(--warn)">3.7 months</div>
       <div class="metric-delta" style="margin-bottom:16px">At current net burn rate</div>
       <div class="runway-bar-wrap">
         <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px">
           <span>Danger zone</span><span>Safe zone</span>
         </div>
         <div class="runway-bar-bg">
-          <div class="runway-bar-fill" style="width:37%;background:linear-gradient(90deg, var(--danger) 0%, var(--warn) 50%, var(--accent) 100%)"></div>
+          <div id="burnRunwayBar" class="runway-bar-fill" style="width:37%;background:linear-gradient(90deg, var(--danger) 0%, var(--warn) 50%, var(--accent) 100%)"></div>
         </div>
       </div>
       <div style="font-size:11px;color:var(--warn);margin-top:8px">⚠ Target minimum 6 months runway</div>
@@ -796,13 +796,13 @@
 
     <div class="burn-card">
       <div class="metric-label">Burn Efficiency</div>
-      <div class="metric-value green" style="margin: 8px 0">1.42x</div>
+      <div class="metric-value green" id="burnEfficiency" style="margin: 8px 0">1.42x</div>
       <div class="metric-delta" style="margin-bottom:16px">Revenue per dollar burned</div>
       <div class="runway-bar-wrap">
         <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px">
           <span>1.0x breakeven</span><span>2.0x excellent</span>
         </div>
-        <div class="runway-bar-bg"><div class="runway-bar-fill" style="width:70%;background:var(--accent)"></div></div>
+        <div class="runway-bar-bg"><div id="burnEfficiencyBar" class="runway-bar-fill" style="width:70%;background:var(--accent)"></div></div>
       </div>
       <div style="font-size:11px;color:var(--accent);margin-top:8px">✓ Above 1.0x — generating positive returns</div>
     </div>
@@ -823,35 +823,35 @@
         <div class="expense-item">
           <div><span class="expense-dot" style="background:#3b82f6"></span>Payroll & Benefits</div>
           <div style="text-align:right">
-            <div style="font-family:var(--mono);font-size:14px">$9,316</div>
+            <div id="burnExpPayroll" style="font-family:var(--mono);font-size:14px">$9,316</div>
             <div style="font-size:11px;color:var(--muted)">42%</div>
           </div>
         </div>
         <div class="expense-item">
           <div><span class="expense-dot" style="background:#8b5cf6"></span>Operations & Rent</div>
           <div style="text-align:right">
-            <div style="font-family:var(--mono);font-size:14px">$5,101</div>
+            <div id="burnExpOps" style="font-family:var(--mono);font-size:14px">$5,101</div>
             <div style="font-size:11px;color:var(--muted)">23%</div>
           </div>
         </div>
         <div class="expense-item">
           <div><span class="expense-dot" style="background:#f59e0b"></span>Marketing & Ads</div>
           <div style="text-align:right">
-            <div style="font-family:var(--mono);font-size:14px">$3,993</div>
+            <div id="burnExpMarketing" style="font-family:var(--mono);font-size:14px">$3,993</div>
             <div style="font-size:11px;color:var(--muted)">18%</div>
           </div>
         </div>
         <div class="expense-item">
           <div><span class="expense-dot" style="background:#ef4444"></span>Software & Tools</div>
           <div style="text-align:right">
-            <div style="font-family:var(--mono);font-size:14px">$2,440</div>
+            <div id="burnExpSoftware" style="font-family:var(--mono);font-size:14px">$2,440</div>
             <div style="font-size:11px;color:var(--muted)">11%</div>
           </div>
         </div>
         <div class="expense-item">
           <div><span class="expense-dot" style="background:#10b981"></span>Other</div>
           <div style="text-align:right">
-            <div style="font-family:var(--mono);font-size:14px">$1,331</div>
+            <div id="burnExpOther" style="font-family:var(--mono);font-size:14px">$1,331</div>
             <div style="font-size:11px;color:var(--muted)">6%</div>
           </div>
         </div>
@@ -1695,6 +1695,8 @@ function analyzeWithAI() {
 // === CLEAR ALL ===
 function clearAllData() {
   if(!confirm('Reset all transactions and figures to zero? This cannot be undone.')) return;
+
+  // Live Tracker
   transactions.length = 0;
   renderTransactions();
   document.getElementById('cashOnHand').textContent = '$0';
@@ -1704,6 +1706,21 @@ function clearAllData() {
   document.getElementById('warningSummaryBar').style.display = 'none';
   document.getElementById('warningZone').innerHTML = '';
   dismissedWarnings.clear();
+
+  // Burn Rate tab
+  document.getElementById('burnMonthlyRate').textContent = '$0';
+  document.getElementById('burnNetText').textContent = 'Net burn: $0/mo';
+  document.getElementById('burnRatioBar').style.width = '0%';
+  document.getElementById('burnRatioText').textContent = 'Net burn is 0% of gross burn';
+  document.getElementById('burnRunway').textContent = '0 months';
+  document.getElementById('burnRunwayBar').style.width = '0%';
+  document.getElementById('burnEfficiency').textContent = '0x';
+  document.getElementById('burnEfficiencyBar').style.width = '0%';
+  ['burnExpPayroll','burnExpOps','burnExpMarketing','burnExpSoftware','burnExpOther'].forEach(id => {
+    document.getElementById(id).textContent = '$0';
+  });
+
+  // Forward Model
   document.getElementById('fwdCash').value = 0;
   document.getElementById('fwdRevenue').value = 0;
   document.getElementById('fwdExpenses').value = 0;
