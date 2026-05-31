@@ -1949,29 +1949,9 @@ function buildMonthlyData(numMonths) {
 }
 
 function initCharts() {
-  const { labels: fl, incomes: fi, expenses: fe } = buildMonthlyData(12);
-  const netData = fi.map((v,i) => v - fe[i]);
-
-  flowChartInst = new Chart(document.getElementById('flowChart'), {
-    type:'bar',
-    data:{
-      labels: fl,
-      datasets:[
-        { label:'Income',   data:fi, backgroundColor:'rgba(0,229,160,0.35)', borderColor:'#00e5a0', borderWidth:1.5, borderRadius:4 },
-        { label:'Expenses', data:fe, backgroundColor:'rgba(239,68,68,0.25)', borderColor:'#ef4444', borderWidth:1.5, borderRadius:4 },
-        { type:'line', label:'Net', data:netData, borderColor:'#3b82f6', borderWidth:2, pointRadius:3, fill:false, tension:0.4 }
-      ]
-    },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{ display:false } },
-      scales:{
-        x:{ ticks:{color:'#6b7280',font:{size:11}}, grid:{color:'rgba(255,255,255,0.04)'} },
-        y:{ ticks:{color:'#6b7280',font:{size:11},callback:v=>formatMoney(v,{compact:true})}, grid:{color:'rgba(255,255,255,0.04)'} }
-      }
-    }
-  });
-
+  // Only create the static expense donut here.
+  // flowChart and burnChart are owned by updateFlowChart/updateBurnChart
+  // so they're always built from live transaction data.
   expenseDonutInst = new Chart(document.getElementById('expenseDonut'), {
     type:'doughnut',
     data:{
@@ -1979,27 +1959,6 @@ function initCharts() {
       datasets:[{ data:[42,23,18,11,6], backgroundColor:['#3b82f6','#8b5cf6','#f59e0b','#ef4444','#10b981'], borderWidth:0, hoverBorderWidth:0 }]
     },
     options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, cutout:'65%' }
-  });
-
-  const { labels: bl, incomes: bi, expenses: be } = buildMonthlyData(6);
-  const bNetBurn = bi.map((v,i) => Math.max(be[i] - v, 0));
-  burnChartInst = new Chart(document.getElementById('burnChart'), {
-    type:'line',
-    data:{
-      labels: bl,
-      datasets:[
-        { label:'Gross Burn', data:be, borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.1)', fill:true, tension:0.4, borderWidth:2, pointRadius:3 },
-        { label:'Net Burn',   data:bNetBurn, borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.08)', fill:true, tension:0.4, borderWidth:2, pointRadius:3, borderDash:[4,4] }
-      ]
-    },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{ display:false } },
-      scales:{
-        x:{ ticks:{color:'#6b7280',font:{size:11}}, grid:{color:'rgba(255,255,255,0.04)'} },
-        y:{ ticks:{color:'#6b7280',font:{size:11},callback:v=>formatMoney(v,{compact:true})}, grid:{color:'rgba(255,255,255,0.04)'} }
-      }
-    }
   });
 }
 
@@ -2764,7 +2723,14 @@ function handleCsvFile(file) {
   if(!file) return;
   showCsvStatus('Reading file...', 'loading');
   const reader = new FileReader();
-  reader.onload = e => parseCsv(e.target.result, file.name);
+  reader.onerror = () => showCsvStatus('Could not read file. Try again.', 'err');
+  reader.onload = e => {
+    try {
+      parseCsv(e.target.result, file.name);
+    } catch(err) {
+      showCsvStatus('Parse error: ' + err.message, 'err');
+    }
+  };
   reader.readAsText(file);
 }
 
