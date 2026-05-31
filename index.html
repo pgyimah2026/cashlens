@@ -1928,22 +1928,35 @@ function dismissWarning(id) {
 }
 
 // === CHARTS ===
-const months = ['Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May'];
-const incomeData = [24000,26500,25200,28100,29500,27800,31000,28500,30200,29800,31000,31450];
-const expenseData = [19800,20100,21000,19500,22000,20800,21500,22800,21000,22500,21800,22180];
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 let flowChartInst, expenseDonutInst, burnChartInst, forwardChartInst, scenarioChartInst;
 
+function buildMonthlyData(numMonths) {
+  const today = new Date();
+  const labels = [], incomes = [], expenses = [];
+  for (let i = numMonths - 1; i >= 0; i--) {
+    const y = today.getFullYear(), m = today.getMonth() - i;
+    const start = new Date(y, m, 1);
+    const end   = new Date(y, m + 1, 0, 23, 59, 59);
+    labels.push(MONTH_NAMES[((m % 12) + 12) % 12]);
+    incomes.push(sumTx(start, end, 'income'));
+    expenses.push(sumTx(start, end, 'expense'));
+  }
+  return { labels, incomes, expenses };
+}
+
 function initCharts() {
-  const netData = incomeData.map((v,i) => v - expenseData[i]);
+  const { labels: fl, incomes: fi, expenses: fe } = buildMonthlyData(12);
+  const netData = fi.map((v,i) => v - fe[i]);
 
   flowChartInst = new Chart(document.getElementById('flowChart'), {
     type:'bar',
     data:{
-      labels: months,
+      labels: fl,
       datasets:[
-        { label:'Income', data:incomeData, backgroundColor:'rgba(0,229,160,0.35)', borderColor:'#00e5a0', borderWidth:1.5, borderRadius:4 },
-        { label:'Expenses', data:expenseData, backgroundColor:'rgba(239,68,68,0.25)', borderColor:'#ef4444', borderWidth:1.5, borderRadius:4 },
+        { label:'Income',   data:fi, backgroundColor:'rgba(0,229,160,0.35)', borderColor:'#00e5a0', borderWidth:1.5, borderRadius:4 },
+        { label:'Expenses', data:fe, backgroundColor:'rgba(239,68,68,0.25)', borderColor:'#ef4444', borderWidth:1.5, borderRadius:4 },
         { type:'line', label:'Net', data:netData, borderColor:'#3b82f6', borderWidth:2, pointRadius:3, fill:false, tension:0.4 }
       ]
     },
@@ -1966,13 +1979,15 @@ function initCharts() {
     options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, cutout:'65%' }
   });
 
+  const { labels: bl, incomes: bi, expenses: be } = buildMonthlyData(6);
+  const bNetBurn = bi.map((v,i) => Math.max(be[i] - v, 0));
   burnChartInst = new Chart(document.getElementById('burnChart'), {
     type:'line',
     data:{
-      labels:['Dec','Jan','Feb','Mar','Apr','May'],
+      labels: bl,
       datasets:[
-        { label:'Gross Burn', data:[20800,21500,22800,21000,21800,22180], borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.1)', fill:true, tension:0.4, borderWidth:2, pointRadius:3 },
-        { label:'Net Burn', data:[9800,10500,11800,10000,10800,12910], borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.08)', fill:true, tension:0.4, borderWidth:2, pointRadius:3, borderDash:[4,4] }
+        { label:'Gross Burn', data:be, borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.1)', fill:true, tension:0.4, borderWidth:2, pointRadius:3 },
+        { label:'Net Burn',   data:bNetBurn, borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.08)', fill:true, tension:0.4, borderWidth:2, pointRadius:3, borderDash:[4,4] }
       ]
     },
     options:{
@@ -1984,6 +1999,25 @@ function initCharts() {
       }
     }
   });
+}
+
+function updateFlowChart() {
+  if (!flowChartInst) return;
+  const { labels, incomes, expenses } = buildMonthlyData(12);
+  flowChartInst.data.labels = labels;
+  flowChartInst.data.datasets[0].data = incomes;
+  flowChartInst.data.datasets[1].data = expenses;
+  flowChartInst.data.datasets[2].data = incomes.map((v,i) => v - expenses[i]);
+  flowChartInst.update();
+}
+
+function updateBurnChart() {
+  if (!burnChartInst) return;
+  const { labels, incomes, expenses } = buildMonthlyData(6);
+  burnChartInst.data.labels = labels;
+  burnChartInst.data.datasets[0].data = expenses;
+  burnChartInst.data.datasets[1].data = incomes.map((v,i) => Math.max(expenses[i] - v, 0));
+  burnChartInst.update();
 }
 
 // === FORWARD MODEL ===
@@ -2103,9 +2137,9 @@ function updateAllScenarios() {
   const labels = ['Now','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May'];
   if(scenarioChartInst) scenarioChartInst.destroy();
   scenarioChartInst = new Chart(document.getElementById('scenarioChart'), {
+    type:'line',
     data:{ labels, datasets: seriesData },
     options:{
-      type:'line',
       responsive:true, maintainAspectRatio:false,
       plugins:{ legend:{ display:false } },
       scales:{
@@ -2554,6 +2588,8 @@ function refreshAll() {
   updateMetrics();
   updateBurnRateTab();
   updateReceivablesSummary();
+  updateFlowChart();
+  updateBurnChart();
   runForwardModel();
   updateAllScenarios();
 }
