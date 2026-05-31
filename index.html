@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <title>CashLens — AI Cash Flow Visibility</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -2002,22 +2004,52 @@ function initCharts() {
 }
 
 function updateFlowChart() {
-  if (!flowChartInst) return;
+  if (flowChartInst) { flowChartInst.destroy(); flowChartInst = null; }
   const { labels, incomes, expenses } = buildMonthlyData(12);
-  flowChartInst.data.labels = labels;
-  flowChartInst.data.datasets[0].data = incomes;
-  flowChartInst.data.datasets[1].data = expenses;
-  flowChartInst.data.datasets[2].data = incomes.map((v,i) => v - expenses[i]);
-  flowChartInst.update();
+  const netData = incomes.map((v,i) => v - expenses[i]);
+  flowChartInst = new Chart(document.getElementById('flowChart'), {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        { label:'Income',   data:incomes,  backgroundColor:'rgba(0,229,160,0.35)', borderColor:'#00e5a0', borderWidth:1.5, borderRadius:4 },
+        { label:'Expenses', data:expenses, backgroundColor:'rgba(239,68,68,0.25)', borderColor:'#ef4444', borderWidth:1.5, borderRadius:4 },
+        { type:'line', label:'Net', data:netData, borderColor:'#3b82f6', borderWidth:2, pointRadius:3, fill:false, tension:0.4 }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ ticks:{color:'#6b7280',font:{size:11}}, grid:{color:'rgba(255,255,255,0.04)'} },
+        y:{ ticks:{color:'#6b7280',font:{size:11},callback:v=>formatMoney(v,{compact:true})}, grid:{color:'rgba(255,255,255,0.04)'} }
+      }
+    }
+  });
 }
 
 function updateBurnChart() {
-  if (!burnChartInst) return;
+  if (burnChartInst) { burnChartInst.destroy(); burnChartInst = null; }
   const { labels, incomes, expenses } = buildMonthlyData(6);
-  burnChartInst.data.labels = labels;
-  burnChartInst.data.datasets[0].data = expenses;
-  burnChartInst.data.datasets[1].data = incomes.map((v,i) => Math.max(expenses[i] - v, 0));
-  burnChartInst.update();
+  const netBurn = incomes.map((v,i) => Math.max(expenses[i] - v, 0));
+  burnChartInst = new Chart(document.getElementById('burnChart'), {
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        { label:'Gross Burn', data:expenses, borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.1)', fill:true, tension:0.4, borderWidth:2, pointRadius:3 },
+        { label:'Net Burn',   data:netBurn,  borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.08)', fill:true, tension:0.4, borderWidth:2, pointRadius:3, borderDash:[4,4] }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ ticks:{color:'#6b7280',font:{size:11}}, grid:{color:'rgba(255,255,255,0.04)'} },
+        y:{ ticks:{color:'#6b7280',font:{size:11},callback:v=>formatMoney(v,{compact:true})}, grid:{color:'rgba(255,255,255,0.04)'} }
+      }
+    }
+  });
 }
 
 // === FORWARD MODEL ===
@@ -2583,15 +2615,19 @@ function clearAllData() {
 }
 
 function refreshAll() {
-  renderTransactions();
-  renderInvoices();
-  updateMetrics();
-  updateBurnRateTab();
-  updateReceivablesSummary();
-  updateFlowChart();
-  updateBurnChart();
-  runForwardModel();
-  updateAllScenarios();
+  const run = (fn) => { try { fn(); } catch(e) { console.error(fn.name, e); } };
+  run(renderTransactions);
+  run(renderInvoices);
+  run(updateMetrics);
+  run(updateBurnRateTab);
+  run(updateReceivablesSummary);
+  run(updateFlowChart);
+  run(updateBurnChart);
+  // sync Starting Cash field from cashOnHand if user hasn't typed a custom value
+  const fc = document.getElementById('fwdCash');
+  if (fc && (fc.value === '' || fc.value === '0') && cashOnHand > 0) fc.value = cashOnHand;
+  run(runForwardModel);
+  run(updateAllScenarios);
 }
 
 function syncDashboard() {
@@ -2824,8 +2860,10 @@ function confirmCsvImport() {
   transactions.sort((a,b) => b.date.localeCompare(a.date));
   saveTransactions();
   closeImportModal();
-  refreshAll();
-  showToast(`Imported ${imported} transaction${imported!==1?'s':''}${skipped ? ` (${skipped} skipped)` : ''} — dashboard synced`, 'success');
+  setTimeout(() => {
+    refreshAll();
+    showToast(`Imported ${imported} transaction${imported!==1?'s':''}${skipped ? ` (${skipped} skipped)` : ''} — dashboard synced`, 'success');
+  }, 50);
 }
 
 function parseFlexDate(str) {
