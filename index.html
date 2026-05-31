@@ -565,14 +565,162 @@
 
   /* import btn in header */
   .btn-outline { background: transparent; border: 1px solid var(--border2); }
+
+  /* === CURRENCY SELECTOR === */
+  .currency-row { padding: 10px 20px 14px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  .currency-label { display: block; font-size: 10px; color: var(--muted); font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 5px; }
+  .currency-note { font-size: 10px; color: var(--muted); margin-top: 4px; opacity: 0.7; }
+  .currency-select {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 7px; padding: 6px 10px; color: var(--text); font-family: var(--body);
+    font-size: 12px; outline: none; cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 9px center;
+  }
+  .currency-select:focus { border-color: var(--accent); }
+
+  /* === SETTINGS BUTTON === */
+  .settings-btn {
+    display: flex; align-items: center; gap: 6px; width: 100%;
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-family: var(--body); font-size: 12px; font-weight: 500;
+    padding: 8px 0 0; text-align: left; transition: color 0.15s;
+  }
+  .settings-btn:hover { color: var(--text); }
+
+  /* === DEMO BANNER === */
+  .demo-banner {
+    background: rgba(59,130,246,0.1); border-bottom: 1px solid rgba(59,130,246,0.25);
+    padding: 10px 24px; display: flex; align-items: center; gap: 12px;
+    font-size: 12px; color: var(--text); flex-wrap: wrap;
+  }
+  .demo-banner span { flex: 1; }
+  .demo-banner button {
+    background: none; border: 1px solid rgba(59,130,246,0.4); border-radius: 6px;
+    color: var(--accent2); font-size: 11px; padding: 4px 10px; cursor: pointer;
+    font-family: var(--body); transition: background 0.15s;
+  }
+  .demo-banner button:hover { background: rgba(59,130,246,0.15); }
+
+  /* === SHARED MODE BANNER === */
+  .shared-banner {
+    background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.3);
+    border-radius: 10px; padding: 12px 16px; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 13px;
+  }
+  .shared-banner span { flex: 1; color: var(--text); }
+  .shared-banner button {
+    background: none; border: 1px solid rgba(139,92,246,0.4); border-radius: 6px;
+    color: var(--purple); font-size: 12px; padding: 5px 12px; cursor: pointer;
+    font-family: var(--body); transition: background 0.15s;
+  }
+  .shared-banner button:hover { background: rgba(139,92,246,0.15); }
+
+  /* === TOAST === */
+  #toastContainer { position: fixed; bottom: 24px; right: 24px; z-index: 9000; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    background: var(--surface); border: 1px solid var(--border2); border-radius: 10px;
+    padding: 12px 16px; font-size: 13px; color: var(--text); max-width: 340px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4); opacity: 0; transform: translateY(8px);
+    transition: all 0.25s ease; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .toast-success { border-left: 3px solid var(--accent); }
+  .toast-error   { border-left: 3px solid var(--danger); }
+  .toast-info    { border-left: 3px solid var(--accent2); }
+
+  /* === RECEIVABLES / INVOICE === */
+  .ar-summary-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 24px; }
+  .invoice-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .invoice-table-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .invoice-table-title { font-family: var(--heading); font-size: 14px; font-weight: 600; }
+  .invoice-status {
+    display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 20px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; cursor: pointer;
+  }
+  .status-open     { background: rgba(59,130,246,0.15); color: var(--accent2); }
+  .status-paid     { background: rgba(0,229,160,0.12); color: var(--accent); }
+  .status-overdue  { background: rgba(239,68,68,0.15); color: var(--danger); }
+  .status-written_off { background: rgba(107,114,128,0.15); color: var(--muted); }
+  .dso-badge {
+    display: inline-flex; align-items: center; gap: 6px; background: var(--surface2);
+    border: 1px solid var(--border2); border-radius: 8px; padding: 6px 12px; font-size: 12px;
+  }
+  .dso-val { font-family: var(--mono); font-size: 18px; font-weight: 500; color: var(--accent2); }
+  .dso-tooltip { cursor: help; color: var(--muted); }
+  .collections-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+  .collection-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .collection-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .collection-val { font-family: var(--mono); font-size: 18px; font-weight: 500; }
+  .at-risk { font-size: 10px; color: var(--warn); margin-top: 4px; }
+
+  /* === SHARE BUTTON === */
+  .share-btn {
+    background: none; border: 1px solid var(--border2); border-radius: 6px;
+    color: var(--muted); font-size: 11px; padding: 3px 9px; cursor: pointer;
+    font-family: var(--body); transition: all 0.15s;
+  }
+  .share-btn:hover { border-color: var(--purple); color: var(--purple); }
+
+  /* === SETTINGS MODAL EXTRAS === */
+  .settings-action {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; margin-bottom: 12px;
+  }
+  .settings-action-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .settings-action-desc { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+
+  /* === AR ADJUSTED RUNWAY === */
+  .runway-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .runway-compare-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+
+  /* === MOBILE === */
+  @media (max-width: 640px) {
+    .sidebar { width: 200px; }
+    .metric-grid { grid-template-columns: repeat(2,1fr); }
+    .chart-grid { grid-template-columns: 1fr; }
+    .burn-grid { grid-template-columns: 1fr; }
+    .scenario-grid { grid-template-columns: 1fr; }
+    .ar-summary-grid { grid-template-columns: repeat(2,1fr); }
+    .collections-grid { grid-template-columns: 1fr; }
+    #toastContainer { right: 12px; bottom: 12px; left: 12px; }
+    .toast { max-width: 100%; }
+  }
+  @media (max-width: 380px) {
+    .sidebar { width: 180px; }
+    .currency-select { font-size: 11px; }
+  }
 </style>
 </head>
 <body>
+<div id="demoBanner" class="demo-banner" style="display:none" role="status">
+  <span>📊 You're viewing demo data.</span>
+  <button onclick="clearAllData()">Clear and start fresh</button>
+  <button onclick="dismissDemoBanner()">Keep exploring</button>
+</div>
+
+<div id="toastContainer" aria-live="polite" aria-atomic="false"></div>
+
 <div class="app">
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="logo">Cash<span>Lens</span></div>
+  <div class="currency-row">
+    <label class="currency-label" for="currencySelect">Currency</label>
+    <select id="currencySelect" class="currency-select" onchange="setCurrency(this.value)" aria-label="Select display currency">
+      <option value="USD">USD ($)</option>
+      <option value="GBP">GBP (£)</option>
+      <option value="EUR">EUR (€)</option>
+      <option value="INR">INR (₹)</option>
+      <option value="NGN">NGN (₦)</option>
+      <option value="CAD">CAD (C$)</option>
+      <option value="AUD">AUD (A$)</option>
+      <option value="KES">KES (KSh)</option>
+      <option value="ZAR">ZAR (R)</option>
+    </select>
+    <div class="currency-note">Display only — values not converted</div>
+  </div>
   <nav>
     <div class="nav-item active" onclick="showTab('tracker')">
       <span class="nav-icon">◈</span> Live Tracker
@@ -589,15 +737,25 @@
     <div class="nav-item" onclick="showTab('ai')">
       <span class="nav-icon">✦</span> AI Advisor
     </div>
+    <div class="nav-item" onclick="showTab('receivables')">
+      <span class="nav-icon">◎</span> Receivables
+    </div>
   </nav>
   <div class="sidebar-footer">
     <div class="free-badge">FREE FOR SMBs</div>
     <div>CashLens gives small businesses enterprise-grade cash flow intelligence at no cost.</div>
+    <button class="settings-btn" onclick="openSettings()" aria-label="Open settings">⚙ Settings</button>
   </div>
 </aside>
 
 <!-- MAIN CONTENT -->
 <main class="main">
+
+<div id="sharedBanner" class="shared-banner" style="display:none" role="status">
+  <span>👁 Viewing a shared scenario from <strong id="sharedBannerDate">—</strong>.</span>
+  <button onclick="cloneSharedScenario()">Clone to my CashLens</button>
+  <button onclick="exitSharedMode()">Exit shared view</button>
+</div>
 
 <!-- ============ LIVE TRACKER ============ -->
 <div id="tab-tracker" class="tab-content active">
@@ -627,23 +785,23 @@
   <div class="metric-grid">
     <div class="metric-card green">
       <div class="metric-label">Cash on Hand</div>
-      <div class="metric-value green" id="cashOnHand">$48,320</div>
-      <div class="metric-delta"><span class="up">↑ 12.4%</span> vs last month</div>
+      <div class="metric-value green" id="cashOnHand">—</div>
+      <div class="metric-delta" id="deltaCash"><span style="color:var(--muted)">—</span></div>
     </div>
     <div class="metric-card blue">
       <div class="metric-label">Monthly Inflow</div>
-      <div class="metric-value blue" id="monthlyIn">$31,450</div>
-      <div class="metric-delta"><span class="up">↑ 8.1%</span> vs last month</div>
+      <div class="metric-value blue" id="monthlyIn">—</div>
+      <div class="metric-delta" id="deltaInflow"><span style="color:var(--muted)">—</span></div>
     </div>
     <div class="metric-card warn">
       <div class="metric-label">Monthly Outflow</div>
-      <div class="metric-value warn" id="monthlyOut">$22,180</div>
-      <div class="metric-delta"><span class="down">↑ 3.2%</span> spending increase</div>
+      <div class="metric-value warn" id="monthlyOut">—</div>
+      <div class="metric-delta" id="deltaOutflow"><span style="color:var(--muted)">—</span></div>
     </div>
     <div class="metric-card green">
       <div class="metric-label">Net Cash Flow</div>
-      <div class="metric-value green" id="netFlow">+$9,270</div>
-      <div class="metric-delta"><span class="up">↑ 18.6%</span> improvement</div>
+      <div class="metric-value green" id="netFlow">—</div>
+      <div class="metric-delta" id="deltaNet"><span style="color:var(--muted)">—</span></div>
     </div>
   </div>
 
@@ -859,9 +1017,22 @@
     </div>
   </div>
 
+  <div class="runway-compare">
+    <div class="runway-compare-card">
+      <div class="metric-label">Cash-Only Runway</div>
+      <div class="metric-value warn" id="cashOnlyRunway" style="margin:8px 0">—</div>
+      <div style="font-size:11px;color:var(--muted)">Cash on hand ÷ net monthly burn</div>
+    </div>
+    <div class="runway-compare-card" style="border-color:rgba(0,229,160,0.25)">
+      <div class="metric-label">AR-Adjusted Runway</div>
+      <div class="metric-value green" id="arAdjustedRunway" style="margin:8px 0">—</div>
+      <div style="font-size:11px;color:var(--muted)">Includes expected collections (next 30d)</div>
+    </div>
+  </div>
+
   <div class="alert alert-warn">
     <div class="alert-icon">⚠</div>
-    <div>Your runway is below the recommended 6-month threshold. Consider accelerating collections or identifying non-essential expenses to reduce monthly burn by ~$3,000.</div>
+    <div id="burnRateAlert">Your runway is below the recommended 6-month threshold. Consider accelerating collections or identifying non-essential expenses to reduce monthly burn by ~$3,000.</div>
   </div>
 </div>
 
@@ -879,7 +1050,10 @@
     <div class="scenario-card" id="sc-best">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <div class="scenario-name">🚀 Best Case</div>
-        <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(0,229,160,0.12);color:var(--accent);font-weight:600">OPTIMISTIC</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="share-btn hide-in-shared" onclick="shareScenario('best')" aria-label="Share best case scenario">🔗 Share</button>
+          <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(0,229,160,0.12);color:var(--accent);font-weight:600">OPTIMISTIC</span>
+        </div>
       </div>
       <div class="scenario-desc">Revenue surges, expenses stay controlled. Major client wins or product breakthrough.</div>
       <div class="slider-group">
@@ -904,7 +1078,10 @@
     <div class="scenario-card active-scenario" id="sc-base">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <div class="scenario-name">📊 Base Case</div>
-        <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(0,229,160,0.15);color:var(--accent);font-weight:600">CURRENT</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="share-btn hide-in-shared" onclick="shareScenario('base')" aria-label="Share base case scenario">🔗 Share</button>
+          <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(0,229,160,0.15);color:var(--accent);font-weight:600">CURRENT</span>
+        </div>
       </div>
       <div class="scenario-desc">Steady growth continuing the current trend. No major surprises either way.</div>
       <div class="slider-group">
@@ -929,7 +1106,10 @@
     <div class="scenario-card" id="sc-worst">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <div class="scenario-name">⚠️ Worst Case</div>
-        <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(239,68,68,0.12);color:var(--danger);font-weight:600">STRESS TEST</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="share-btn hide-in-shared" onclick="shareScenario('worst')" aria-label="Share worst case scenario">🔗 Share</button>
+          <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(239,68,68,0.12);color:var(--danger);font-weight:600">STRESS TEST</span>
+        </div>
       </div>
       <div class="scenario-desc">Major client loss, economic downturn, or unexpected costs hit simultaneously.</div>
       <div class="slider-group">
@@ -954,7 +1134,10 @@
     <div class="scenario-card" id="sc-custom">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <div class="scenario-name">🔧 Custom Scenario</div>
-        <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(139,92,246,0.12);color:var(--purple);font-weight:600">USER DEFINED</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="share-btn hide-in-shared" onclick="shareScenario('custom')" aria-label="Share custom scenario">🔗 Share</button>
+          <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(139,92,246,0.12);color:var(--purple);font-weight:600">USER DEFINED</span>
+        </div>
       </div>
       <div class="scenario-desc">Build your own what-if scenario based on specific business events.</div>
       <div class="slider-group">
@@ -981,6 +1164,88 @@
     <div class="chart-sub">All scenarios plotted together</div>
     <div class="chart-wrap" style="height:250px">
       <canvas id="scenarioChart" role="img" aria-label="Scenario comparison chart showing best, base, worst, and custom case projections">Scenario comparison</canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ============ RECEIVABLES ============ -->
+<div id="tab-receivables" class="tab-content">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Accounts Receivable</div>
+      <div class="page-sub">Outstanding invoices, DSO, and expected collections</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn hide-in-shared" onclick="openInvoiceModal()">+ Add Invoice</button>
+    </div>
+  </div>
+
+  <div class="ar-summary-grid">
+    <div class="metric-card blue">
+      <div class="metric-label">Total AR Outstanding</div>
+      <div class="metric-value blue" id="arTotal">—</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Open Invoices</div>
+      <div class="metric-value" id="arOpenCount" style="color:var(--text)">—</div>
+    </div>
+    <div class="metric-card danger">
+      <div class="metric-label">Overdue Invoices</div>
+      <div class="metric-value danger" id="arOverdueCount">—</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">
+        Days Sales Outstanding
+        <span class="dso-tooltip" title="DSO = (Total AR ÷ Credit Sales in last 90 days) × 90. Lower is better.">ⓘ</span>
+      </div>
+      <div class="metric-value" id="arDSO" style="color:var(--accent2)">—</div>
+    </div>
+  </div>
+
+  <div class="collections-grid">
+    <div class="collection-card">
+      <div class="collection-label">Expected in 30 days</div>
+      <div class="collection-val green" id="col30">—</div>
+    </div>
+    <div class="collection-card">
+      <div class="collection-label">Expected in 60 days</div>
+      <div class="collection-val blue" id="col60">—</div>
+    </div>
+    <div class="collection-card">
+      <div class="collection-label">Expected in 90 days</div>
+      <div class="collection-val" id="col90" style="color:var(--text)">—</div>
+    </div>
+  </div>
+
+  <div class="invoice-table-wrap">
+    <div class="invoice-table-header">
+      <div class="invoice-table-title">Invoices</div>
+      <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)">
+        Sort by:
+        <select id="invoiceSort" class="col-map-select" style="width:auto;padding:4px 8px" onchange="renderInvoices()">
+          <option value="dueDate">Due Date</option>
+          <option value="customer">Customer</option>
+          <option value="amountOutstanding">Amount</option>
+          <option value="status">Status</option>
+        </select>
+      </div>
+    </div>
+    <table class="data-table" id="invoiceTable">
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Issued</th>
+          <th>Due Date</th>
+          <th style="text-align:right">Issued</th>
+          <th style="text-align:right">Outstanding</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="invoiceBody"></tbody>
+    </table>
+    <div id="invoiceEmpty" style="padding:32px;text-align:center;color:var(--muted);font-size:13px;display:none">
+      No invoices yet. <button class="btn hide-in-shared" style="margin-left:8px" onclick="openInvoiceModal()">+ Add your first invoice</button>
     </div>
   </div>
 </div>
@@ -1173,31 +1438,245 @@
 </main>
 </div>
 
+<!-- ============ INVOICE MODAL ============ -->
+<div id="invoiceModal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)closeInvoiceModal()">
+  <div class="modal">
+    <div class="modal-title" id="invoiceModalTitle">Add Invoice</div>
+    <div class="modal-sub">Track outstanding receivables</div>
+    <input type="hidden" id="invEditId">
+    <div class="form-row">
+      <label>Customer / Client</label>
+      <input class="form-input" type="text" id="invCustomer" placeholder="e.g. Acme Corp">
+    </div>
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label>Amount Issued</label>
+        <input class="form-input" type="number" id="invAmountIssued" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>Amount Outstanding</label>
+        <input class="form-input" type="number" id="invAmountOutstanding" placeholder="0.00" min="0" step="0.01">
+      </div>
+    </div>
+    <div class="form-row-2" style="margin-top:14px">
+      <div class="form-row" style="margin-bottom:0">
+        <label>Issue Date</label>
+        <input class="form-input" type="date" id="invIssueDate">
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>Due Date</label>
+        <input class="form-input" type="date" id="invDueDate">
+      </div>
+    </div>
+    <div class="form-row" style="margin-top:14px">
+      <label>Expected Payment Date (optional)</label>
+      <input class="form-input" type="date" id="invExpectedDate">
+    </div>
+    <div class="form-row">
+      <label>Status</label>
+      <select class="form-select" id="invStatus">
+        <option value="open">Open</option>
+        <option value="overdue">Overdue</option>
+        <option value="paid">Paid</option>
+        <option value="written_off">Written Off</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeInvoiceModal()">Cancel</button>
+      <button class="btn btn-accent" onclick="submitInvoiceModal()">Save Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SETTINGS MODAL ============ -->
+<div id="settingsModal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)closeSettings()">
+  <div class="modal">
+    <div class="modal-title">⚙ Settings</div>
+    <div class="modal-sub">Manage your CashLens data</div>
+
+    <div class="settings-action">
+      <div class="settings-action-title">📊 Load Demo Data</div>
+      <div class="settings-action-desc">Populate transactions, invoices, and all inputs with a realistic sample dataset. Great for exploring every feature before entering your own numbers.</div>
+      <button class="btn" onclick="confirmLoadDemo()">Load demo data</button>
+    </div>
+
+    <div class="settings-action" style="border-color:rgba(239,68,68,0.2)">
+      <div class="settings-action-title" style="color:var(--danger)">⊘ Clear All Data</div>
+      <div class="settings-action-desc">Permanently wipe all transactions, invoices, and settings. Every display resets to zero.</div>
+      <button class="btn btn-danger" onclick="clearAllData()">Clear everything</button>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" onclick="closeSettings()">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
+// ============================================================
+// === CURRENCY ===
+// ============================================================
+const CURRENCIES = {
+  USD: { code:'USD', locale:'en-US', label:'USD ($)' },
+  GBP: { code:'GBP', locale:'en-GB', label:'GBP (£)' },
+  EUR: { code:'EUR', locale:'de-DE', label:'EUR (€)' },
+  INR: { code:'INR', locale:'en-IN', label:'INR (₹)' },
+  NGN: { code:'NGN', locale:'en-NG', label:'NGN (₦)' },
+  CAD: { code:'CAD', locale:'en-CA', label:'CAD (C$)' },
+  AUD: { code:'AUD', locale:'en-AU', label:'AUD (A$)' },
+  KES: { code:'KES', locale:'en-KE', label:'KES (KSh)' },
+  ZAR: { code:'ZAR', locale:'en-ZA', label:'ZAR (R)' },
+};
+let activeCurrency = localStorage.getItem('cashlens.currency') || 'USD';
+
+function formatMoney(amount, { compact=false }={}) {
+  const c = CURRENCIES[activeCurrency] || CURRENCIES.USD;
+  try {
+    return new Intl.NumberFormat(c.locale, {
+      style:'currency', currency:c.code,
+      ...(compact
+        ? { notation:'compact', maximumFractionDigits:1 }
+        : { minimumFractionDigits:0, maximumFractionDigits:0 })
+    }).format(amount);
+  } catch(e) {
+    return new Intl.NumberFormat('en-US', {
+      style:'currency', currency:c.code,
+      ...(compact
+        ? { notation:'compact', maximumFractionDigits:1 }
+        : { minimumFractionDigits:0, maximumFractionDigits:0 })
+    }).format(amount);
+  }
+}
+
+function setCurrency(code) {
+  activeCurrency = code;
+  localStorage.setItem('cashlens.currency', code);
+  refreshAllMoneyDisplays();
+}
+
+function refreshAllMoneyDisplays() {
+  updateMetrics();
+  updateBurnRateTab();
+  updateReceivablesSummary();
+  renderTransactions();
+  renderInvoices();
+  if(flowChartInst)    { flowChartInst.options.scales.y.ticks.callback = v => formatMoney(v,{compact:true}); flowChartInst.update(); }
+  if(burnChartInst)    { burnChartInst.options.scales.y.ticks.callback = v => formatMoney(v,{compact:true}); burnChartInst.update(); }
+  runForwardModel();
+  updateAllScenarios();
+}
+
+// ============================================================
+// === STATE & STORAGE ===
+// ============================================================
+let transactions = [];
+let invoices     = [];
+let cashOnHand   = 48320;
+
+function saveTransactions() { localStorage.setItem('cashlens.transactions', JSON.stringify(transactions)); }
+function saveInvoices()     { localStorage.setItem('cashlens.invoices',     JSON.stringify(invoices)); }
+function saveCashOnHand(v)  { cashOnHand = v; localStorage.setItem('cashlens.cashOnHand', String(v)); }
+
+function loadState() {
+  try { const s = localStorage.getItem('cashlens.transactions'); if(s) transactions = JSON.parse(s); } catch(e){}
+  try { const s = localStorage.getItem('cashlens.invoices');     if(s) invoices     = JSON.parse(s); } catch(e){}
+  const ch = parseFloat(localStorage.getItem('cashlens.cashOnHand'));
+  if(!isNaN(ch)) cashOnHand = ch;
+}
+
+// ============================================================
+// === DEMO DATA ===
+// ============================================================
+function getDemoData() {
+  const today = new Date();
+  const y = today.getFullYear(), m = today.getMonth();
+  const py = m===0 ? y-1 : y, pm = m===0 ? 11 : m-1;
+  const cap = (yr,mo,d) => {
+    const max = new Date(yr,mo+1,0).getDate();
+    return new Date(yr,mo,Math.min(d,max)).toISOString().split('T')[0];
+  };
+  const c = d => cap(y,m,d);   // current month
+  const p = d => cap(py,pm,d); // previous month
+  return {
+    cashOnHand: 48320,
+    transactions: [
+      // Current month — income totals $31,450
+      {id:'dt1',  date:c(17), desc:'Stripe Revenue — monthly batch',      cat:'Revenue',    type:'income',  amount: 8420},
+      {id:'dt2',  date:c(15), desc:'Client Invoice — Acme Corp',          cat:'Revenue',    type:'income',  amount: 5500},
+      {id:'dt3',  date:c(12), desc:'Consulting retainer — DataCo',        cat:'Revenue',    type:'income',  amount: 3200},
+      {id:'dt4',  date:c(5),  desc:'Product sales batch',                 cat:'Revenue',    type:'income',  amount: 7130},
+      {id:'dt5',  date:c(2),  desc:'Advisory services',                   cat:'Consulting', type:'income',  amount: 7200},
+      // Current month — expenses total $22,180
+      {id:'dt6',  date:c(16), desc:'AWS hosting & services',              cat:'Software',   type:'expense', amount:  -890},
+      {id:'dt7',  date:c(14), desc:'Payroll run — 4 staff',               cat:'Payroll',    type:'expense', amount: -9316},
+      {id:'dt8',  date:c(13), desc:'Google Ads campaign',                 cat:'Marketing',  type:'expense', amount: -1200},
+      {id:'dt9',  date:c(10), desc:'Office rent',                         cat:'Operations', type:'expense', amount: -2800},
+      {id:'dt10', date:c(9),  desc:'SaaS tools bundle',                   cat:'Software',   type:'expense', amount:  -340},
+      {id:'dt11', date:c(3),  desc:'Tax payment',                         cat:'Tax',        type:'expense', amount: -1200},
+      {id:'dt12', date:c(2),  desc:'Staff expenses & travel',             cat:'Operations', type:'expense', amount:  -634},
+      {id:'dt13', date:c(1),  desc:'Marketing — content creation',        cat:'Marketing',  type:'expense', amount: -3600},
+      {id:'dt14', date:c(1),  desc:'Legal & professional fees',           cat:'Operations', type:'expense', amount: -2200},
+      // Previous month — income $29,100
+      {id:'dt15', date:p(20), desc:'Stripe Revenue — prev month batch',   cat:'Revenue',    type:'income',  amount: 7800},
+      {id:'dt16', date:p(15), desc:'Client Invoice — prev month',         cat:'Revenue',    type:'income',  amount: 5100},
+      {id:'dt17', date:p(10), desc:'Consulting retainer — prev month',    cat:'Revenue',    type:'income',  amount: 3000},
+      {id:'dt18', date:p(5),  desc:'Product sales — prev month',          cat:'Revenue',    type:'income',  amount: 6500},
+      {id:'dt19', date:p(2),  desc:'Advisory services — prev month',      cat:'Consulting', type:'income',  amount: 6700},
+      // Previous month — expenses $21,500
+      {id:'dt20', date:p(19), desc:'AWS hosting & services',              cat:'Software',   type:'expense', amount:  -890},
+      {id:'dt21', date:p(14), desc:'Payroll run — 4 staff',               cat:'Payroll',    type:'expense', amount: -9316},
+      {id:'dt22', date:p(13), desc:'Google Ads campaign',                 cat:'Marketing',  type:'expense', amount:  -980},
+      {id:'dt23', date:p(10), desc:'Office rent',                         cat:'Operations', type:'expense', amount: -2800},
+      {id:'dt24', date:p(9),  desc:'SaaS tools bundle',                   cat:'Software',   type:'expense', amount:  -340},
+      {id:'dt25', date:p(5),  desc:'Tax payment',                         cat:'Tax',        type:'expense', amount: -1100},
+      {id:'dt26', date:p(2),  desc:'Staff expenses',                      cat:'Operations', type:'expense', amount:  -540},
+      {id:'dt27', date:p(1),  desc:'Marketing — campaigns',               cat:'Marketing',  type:'expense', amount: -3184},
+      {id:'dt28', date:p(1),  desc:'Legal & professional fees',           cat:'Operations', type:'expense', amount: -2350},
+    ],
+    invoices: [
+      {id:'i1', customer:'Acme Corp',       amountIssued:5500, amountOutstanding:5500, issueDate:c(1),  dueDate:c(28), status:'open'},
+      {id:'i2', customer:'DataCo',          amountIssued:3200, amountOutstanding:0,    issueDate:p(15), dueDate:c(5),  status:'paid'},
+      {id:'i3', customer:'TechStart Ltd',   amountIssued:2800, amountOutstanding:2800, issueDate:p(20), dueDate:p(10), status:'overdue'},
+      {id:'i4', customer:'GlobalMedia Inc', amountIssued:8500, amountOutstanding:8500, issueDate:p(7),  dueDate:c(15), status:'open'},
+    ],
+  };
+}
+
+function loadDemoData() {
+  const d = getDemoData();
+  transactions.length = 0; transactions.push(...d.transactions);
+  invoices.length = 0;     invoices.push(...d.invoices);
+  saveCashOnHand(d.cashOnHand);
+  saveTransactions(); saveInvoices();
+  // Reset forward model inputs to demo values
+  const fi = (id,v) => { const el = document.getElementById(id); if(el) el.value = v; };
+  fi('fwdCash',d.cashOnHand); fi('fwdRevenue',31450); fi('fwdExpenses',22180); fi('fwdGrowth',3);
+  refreshAll();
+}
+
+// ============================================================
 // === NAV ===
+// ============================================================
 function showTab(name) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   event.currentTarget.classList.add('active');
-  if(name === 'forward') runForwardModel();
-  if(name === 'scenario') updateAllScenarios();
+  if(name === 'forward')     runForwardModel();
+  if(name === 'scenario')    updateAllScenarios();
+  if(name === 'receivables') updateReceivablesSummary();
 }
 
-// === SAMPLE TRANSACTIONS ===
-const transactions = [
-  {date:'2025-05-17',desc:'Stripe Revenue — May batch',cat:'Revenue',type:'income',amount:8420},
-  {date:'2025-05-16',desc:'AWS hosting & services',cat:'Software',type:'expense',amount:-890},
-  {date:'2025-05-15',desc:'Client Invoice #1047 — Acme Corp',cat:'Revenue',type:'income',amount:5500},
-  {date:'2025-05-14',desc:'Payroll run — 4 staff',cat:'Payroll',type:'expense',amount:-9316},
-  {date:'2025-05-13',desc:'Google Ads campaign',cat:'Marketing',type:'expense',amount:-1200},
-  {date:'2025-05-12',desc:'Consulting retainer — DataCo',cat:'Revenue',type:'income',amount:3200},
-  {date:'2025-05-10',desc:'Office rent — May',cat:'Operations',type:'expense',amount:-2800},
-  {date:'2025-05-09',desc:'SaaS tools bundle',cat:'Software',type:'expense',amount:-340},
-];
-
+// ============================================================
+// === TRANSACTIONS ===
+// ============================================================
 function renderTransactions() {
   const tbody = document.getElementById('txBody');
+  if(!tbody) return;
+  if(transactions.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted);font-size:13px">No transactions yet. <button class="btn hide-in-shared" style="margin-left:8px" onclick="openAddModal()">+ Add your first</button></td></tr>`;
+    return;
+  }
   tbody.innerHTML = transactions.map((t,i) => `
     <tr>
       <td style="font-family:var(--mono);color:var(--muted)">${t.date}</td>
@@ -1205,42 +1684,69 @@ function renderTransactions() {
       <td><span style="font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:20px;color:var(--muted)">${t.cat}</span></td>
       <td><span style="font-size:11px;font-weight:500" class="${t.type==='income'?'tag-income':'tag-expense'}">${t.type==='income'?'↑ Income':'↓ Expense'}</span></td>
       <td style="text-align:right;font-family:var(--mono);font-weight:500" class="${t.type==='income'?'tag-income':'tag-expense'}">
-        ${t.type==='income'?'+':''} $${Math.abs(t.amount).toLocaleString()}
+        ${t.type==='income'?'+':''}${formatMoney(Math.abs(t.amount))}
       </td>
-      <td><button style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px" onclick="removeTransaction(${i})">✕</button></td>
+      <td><button class="hide-in-shared" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px" onclick="removeTransaction(${i})" aria-label="Remove transaction">✕</button></td>
     </tr>
   `).join('');
 }
 
-function addTransaction() {
-  const newTx = {
-    date: new Date().toISOString().split('T')[0],
-    desc: 'New transaction',
-    cat: 'Revenue',
-    type: 'income',
-    amount: 1000
-  };
-  transactions.unshift(newTx);
-  renderTransactions();
-  updateMetrics();
-}
-
 function removeTransaction(i) {
   transactions.splice(i, 1);
+  saveTransactions();
   renderTransactions();
   updateMetrics();
 }
 
-const CASH_ON_HAND = 48320;
-const MONTHLY_EXPENSES_BASE = 22180;
+// ---- helpers for computed deltas ----
+function monthBounds(offset=0) {
+  const n = new Date(), y = n.getFullYear(), m = n.getMonth() + offset;
+  return { start: new Date(y,m,1), end: new Date(y,m+1,0,23,59,59) };
+}
+function sumTx(start, end, type) {
+  return transactions.filter(t => {
+    const d = new Date(t.date);
+    return (!type || t.type===type) && d>=start && d<=end;
+  }).reduce((s,t) => s + Math.abs(t.amount), 0);
+}
+function deltaHtml(cur, prev, label='vs last month') {
+  if(prev===0 && cur===0) return `<span style="color:var(--muted)">—</span>`;
+  if(prev===0) return `<span class="up">↑ new</span> ${label}`;
+  const pct = ((cur-prev)/Math.abs(prev)*100);
+  const cls = pct>=0 ? 'up' : 'down';
+  return `<span class="${cls}">${pct>=0?'↑':'↓'} ${Math.abs(pct).toFixed(1)}%</span> ${label}`;
+}
 
 function updateMetrics() {
-  const income = transactions.filter(t=>t.type==='income').reduce((a,t)=>a+t.amount,0);
-  const expenses = Math.abs(transactions.filter(t=>t.type==='expense').reduce((a,t)=>a+t.amount,0));
-  const net = income - expenses;
-  document.getElementById('monthlyIn').textContent = '$' + income.toLocaleString();
-  document.getElementById('monthlyOut').textContent = '$' + expenses.toLocaleString();
-  document.getElementById('netFlow').textContent = (net >= 0 ? '+' : '') + '$' + net.toLocaleString();
+  const { start: cs, end: ce } = monthBounds(0);
+  const { start: ps, end: pe } = monthBounds(-1);
+
+  const income   = sumTx(cs, ce, 'income');
+  const expenses = sumTx(cs, ce, 'expense');
+  const net      = income - expenses;
+  const pIncome  = sumTx(ps, pe, 'income');
+  const pExp     = sumTx(ps, pe, 'expense');
+  const pNet     = pIncome - pExp;
+
+  const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  const setHtml = (id,v) => { const el=document.getElementById(id); if(el) el.innerHTML=v; };
+
+  set('cashOnHand', formatMoney(cashOnHand));
+  set('monthlyIn',  formatMoney(income));
+  set('monthlyOut', formatMoney(expenses));
+  set('netFlow',    (net>=0?'+':'')+formatMoney(net));
+
+  // Computed deltas
+  const cashNetPct = cashOnHand>0 ? ((net/cashOnHand)*100).toFixed(1) : null;
+  setHtml('deltaInflow',  deltaHtml(income,   pIncome));
+  setHtml('deltaOutflow', deltaHtml(expenses, pExp));
+  setHtml('deltaNet',     deltaHtml(net,      pNet, 'improvement'));
+  setHtml('deltaCash',    cashNetPct!==null
+    ? `<span class="${net>=0?'up':'down'}">${net>=0?'↑':'↓'} ${Math.abs(cashNetPct)}%</span> monthly net`
+    : `<span style="color:var(--muted)">—</span>`);
+
+  updateBurnRateTab();
+  updateReceivablesSummary();
   runWarningEngine(income, expenses, net);
 }
 
@@ -1256,10 +1762,9 @@ function toggleWarnings() {
 }
 
 function runWarningEngine(income, expenses, net) {
-  const cash = CASH_ON_HAND;
+  const cash = cashOnHand;
   const runway = expenses > 0 ? (cash / expenses) : 999;
   const burnRatio = income > 0 ? expenses / income : 999;
-  const expenseChange = ((expenses - MONTHLY_EXPENSES_BASE) / MONTHLY_EXPENSES_BASE) * 100;
 
   const warnings = [];
 
@@ -1270,7 +1775,7 @@ function runWarningEngine(income, expenses, net) {
       level: 'critical',
       icon: '🔴',
       title: 'Critical: Cash below one month of expenses',
-      desc: `You have $${cash.toLocaleString()} on hand but $${expenses.toLocaleString()} in monthly expenses. You may not be able to cover next month's bills without immediate action.`,
+      desc: `You have ${formatMoney(cash)} on hand but ${formatMoney(expenses)} in monthly expenses. Immediate action required.`,
       action: 'Get AI recommendations →',
       actionFn: "quickPrompt('I have a cash emergency — what are my immediate options to survive the next 30 days?')"
     });
@@ -1283,7 +1788,7 @@ function runWarningEngine(income, expenses, net) {
       level: 'critical',
       icon: '🔴',
       title: 'Negative cash flow this period',
-      desc: `Expenses exceed income by $${Math.abs(net).toLocaleString()}. If this continues, your cash reserves will deplete in ${(cash / Math.abs(net)).toFixed(1)} months.`,
+      desc: `Expenses exceed income by ${formatMoney(Math.abs(net))}. Cash depletes in ${(cash/Math.abs(net)).toFixed(1)} months at this rate.`,
       action: 'Model this in Scenario Planning →',
       actionFn: "showTabDirect('scenario')"
     });
@@ -1309,19 +1814,6 @@ function runWarningEngine(income, expenses, net) {
       desc: `You have a buffer, but it's thinner than recommended. Focus on increasing collections or trimming variable expenses to build a bigger cushion.`,
       action: 'Run a scenario →',
       actionFn: "showTabDirect('scenario')"
-    });
-  }
-
-  // WARNING: Expenses spiking
-  if (expenseChange > 15) {
-    warnings.push({
-      id: 'expense-spike',
-      level: 'warn',
-      icon: '📈',
-      title: `Expenses up ${expenseChange.toFixed(0)}% vs baseline`,
-      desc: `Your spending has increased significantly. Uncontrolled expense growth can erode profit margins even when revenue looks healthy.`,
-      action: 'Ask AI where to cut →',
-      actionFn: "quickPrompt('My expenses spiked — help me identify what to cut without hurting growth')"
     });
   }
 
@@ -1359,7 +1851,7 @@ function runWarningEngine(income, expenses, net) {
       level: 'info',
       icon: '✅',
       title: 'Cash flow looks healthy',
-      desc: `Positive net flow of $${net.toLocaleString()} and ${runway.toFixed(1)} months runway. Consider building reserves or reinvesting in growth.`,
+      desc: `Positive net flow of ${formatMoney(net)} and ${runway.toFixed(1)} months runway. Consider reinvesting in growth.`,
       action: 'Model growth scenarios →',
       actionFn: "showTabDirect('scenario')"
     });
@@ -1379,11 +1871,12 @@ function showTabDirect(name) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   const navItems = document.querySelectorAll('.nav-item');
-  const tabOrder = ['tracker','forward','burn','scenario','ai'];
+  const tabOrder = ['tracker','forward','burn','scenario','ai','receivables'];
   const idx = tabOrder.indexOf(name);
   if(idx >= 0) navItems[idx].classList.add('active');
-  if(name === 'forward') runForwardModel();
-  if(name === 'scenario') updateAllScenarios();
+  if(name==='forward')     runForwardModel();
+  if(name==='scenario')    updateAllScenarios();
+  if(name==='receivables') updateReceivablesSummary();
 }
 
 function renderWarnings(warnings) {
@@ -1456,7 +1949,7 @@ function initCharts() {
       plugins:{ legend:{ display:false } },
       scales:{
         x:{ ticks:{color:'#6b7280',font:{size:11}}, grid:{color:'rgba(255,255,255,0.04)'} },
-        y:{ ticks:{color:'#6b7280',font:{size:11},callback:v=>'$'+(v/1000).toFixed(0)+'K'}, grid:{color:'rgba(255,255,255,0.04)'} }
+        y:{ ticks:{color:'#6b7280',font:{size:11},callback:v=>formatMoney(v,{compact:true})}, grid:{color:'rgba(255,255,255,0.04)'} }
       }
     }
   });
@@ -1484,7 +1977,7 @@ function initCharts() {
       plugins:{ legend:{ display:false } },
       scales:{
         x:{ ticks:{color:'#6b7280',font:{size:11}}, grid:{color:'rgba(255,255,255,0.04)'} },
-        y:{ ticks:{color:'#6b7280',font:{size:11},callback:v=>'$'+(v/1000).toFixed(0)+'K'}, grid:{color:'rgba(255,255,255,0.04)'} }
+        y:{ ticks:{color:'#6b7280',font:{size:11},callback:v=>formatMoney(v,{compact:true})}, grid:{color:'rgba(255,255,255,0.04)'} }
       }
     }
   });
@@ -1509,15 +2002,15 @@ function runForwardModel() {
     cashPos.push(Math.round(curCash));
   }
 
-  document.getElementById('proj3mo').textContent = '$' + cashPos[3].toLocaleString();
-  document.getElementById('proj6mo').textContent = '$' + cashPos[6].toLocaleString();
-  document.getElementById('proj12mo').textContent = '$' + cashPos[12].toLocaleString();
+  document.getElementById('proj3mo').textContent = formatMoney(cashPos[3]);
+  document.getElementById('proj6mo').textContent = formatMoney(cashPos[6]);
+  document.getElementById('proj12mo').textContent = formatMoney(cashPos[12]);
 
   const breakEvenIdx = cashPos.findIndex((v,i)=>i>0 && v <= 0);
   document.getElementById('projBreak').textContent = breakEvenIdx > 0 ? 'Month ' + breakEvenIdx : 'None ✓';
 
   const insight = cashPos[12] > cashPos[0]
-    ? `Strong outlook — your cash position grows by $${(cashPos[12]-cashPos[0]).toLocaleString()} over 12 months at ${growth}% monthly revenue growth. Expenses remain manageable.`
+    ? `Strong outlook — cash grows by ${formatMoney(cashPos[12]-cashPos[0])} over 12 months at ${growth}% monthly revenue growth.`
     : `Warning: at current growth rate, cash turns negative. Consider increasing revenue or cutting expenses.`;
   document.getElementById('forwardInsight').textContent = insight;
 
@@ -1540,7 +2033,7 @@ function runForwardModel() {
       plugins:{ legend:{display:false} },
       scales:{
         x:{ ticks:{color:'#6b7280',font:{size:11}}, grid:{color:'rgba(255,255,255,0.04)'} },
-        y:{ ticks:{color:'#6b7280',font:{size:11},callback:v=>'$'+(v/1000).toFixed(0)+'K'}, grid:{color:'rgba(255,255,255,0.04)'} }
+        y:{ ticks:{color:'#6b7280',font:{size:11},callback:v=>formatMoney(v,{compact:true})}, grid:{color:'rgba(255,255,255,0.04)'} }
       }
     }
   });
@@ -1570,7 +2063,9 @@ function updateScenario(scenario, key, val) {
 
 function calcScenario(scenario) {
   const s = scenarioState[scenario];
-  const baseCash = 48320, baseRev = 31450, baseExp = 22180;
+  const baseCash = cashOnHand;
+  const baseRev = parseFloat(document.getElementById('fwdRevenue')?.value) || 31450;
+  const baseExp = parseFloat(document.getElementById('fwdExpenses')?.value) || 22180;
   const rev = baseRev * (1 + s.rev/100);
   const exp = baseExp * (1 + s.exp/100);
   const net = rev - exp;
@@ -1587,11 +2082,11 @@ function updateAllScenarios() {
 
   scenarios.forEach((s,i) => {
     const r = calcScenario(s);
-    document.getElementById(s+'Result').textContent = '$' + r.cash12.toLocaleString();
+    document.getElementById(s+'Result').textContent = formatMoney(r.cash12);
     document.getElementById(s+'Runway').textContent = r.runway;
 
     // Build monthly series
-    const baseCash = 48320;
+    const baseCash = cashOnHand;
     const monthly = [baseCash];
     let cur = baseCash;
     for(let m=1;m<=12;m++) {
@@ -1612,7 +2107,7 @@ function updateAllScenarios() {
       plugins:{ legend:{ display:false } },
       scales:{
         x:{ ticks:{color:'#6b7280',font:{size:11}}, grid:{color:'rgba(255,255,255,0.04)'} },
-        y:{ ticks:{color:'#6b7280',font:{size:11},callback:v=>'$'+(v/1000).toFixed(0)+'K'}, grid:{color:'rgba(255,255,255,0.04)'} }
+        y:{ ticks:{color:'#6b7280',font:{size:11},callback:v=>formatMoney(v,{compact:true})}, grid:{color:'rgba(255,255,255,0.04)'} }
       }
     }
   });
@@ -1692,42 +2187,389 @@ function analyzeWithAI() {
   quickPrompt('Give me a full cash flow health check based on my current numbers and top 3 recommendations.');
 }
 
-// === CLEAR ALL ===
-function clearAllData() {
-  if(!confirm('Reset all transactions and figures to zero? This cannot be undone.')) return;
+// ============================================================
+// === BURN RATE TAB (dynamic update) ===
+// ============================================================
+function updateBurnRateTab() {
+  const income   = sumTx(monthBounds(0).start, monthBounds(0).end, 'income');
+  const expenses = sumTx(monthBounds(0).start, monthBounds(0).end, 'expense');
+  const netBurn  = Math.max(expenses - income, 0);
+  const grossBurn = expenses;
+  const runway   = grossBurn > 0 ? cashOnHand / grossBurn : 999;
+  const netRunway = netBurn > 0 ? cashOnHand / netBurn : 999;
+  const efficiency = grossBurn > 0 ? (income / grossBurn).toFixed(2) : '0';
+  const ratioBar = grossBurn > 0 ? Math.min((netBurn/grossBurn)*100,100).toFixed(0) : 0;
+  const runwayBar = Math.min((runway/12)*100,100).toFixed(0);
+  const effBar   = Math.min((parseFloat(efficiency)/2)*100,100).toFixed(0);
 
-  // Live Tracker
-  transactions.length = 0;
-  renderTransactions();
-  document.getElementById('cashOnHand').textContent = '$0';
-  document.getElementById('monthlyIn').textContent = '$0';
-  document.getElementById('monthlyOut').textContent = '$0';
-  document.getElementById('netFlow').textContent = '$0';
-  document.getElementById('warningSummaryBar').style.display = 'none';
-  document.getElementById('warningZone').innerHTML = '';
-  dismissedWarnings.clear();
+  const s = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  const sw = (id,v) => { const el=document.getElementById(id); if(el) el.style.width=v+'%'; };
 
-  // Burn Rate tab
-  document.getElementById('burnMonthlyRate').textContent = '$0';
-  document.getElementById('burnNetText').textContent = 'Net burn: $0/mo';
-  document.getElementById('burnRatioBar').style.width = '0%';
-  document.getElementById('burnRatioText').textContent = 'Net burn is 0% of gross burn';
-  document.getElementById('burnRunway').textContent = '0 months';
-  document.getElementById('burnRunwayBar').style.width = '0%';
-  document.getElementById('burnEfficiency').textContent = '0x';
-  document.getElementById('burnEfficiencyBar').style.width = '0%';
-  ['burnExpPayroll','burnExpOps','burnExpMarketing','burnExpSoftware','burnExpOther'].forEach(id => {
-    document.getElementById(id).textContent = '$0';
+  s('burnMonthlyRate', formatMoney(grossBurn));
+  s('burnNetText',     `Net burn: ${formatMoney(netBurn)}/mo`);
+  sw('burnRatioBar',   ratioBar);
+  s('burnRatioText',   `Net burn is ${ratioBar}% of gross burn`);
+  s('burnRunway',      runway < 900 ? runway.toFixed(1)+' months' : '∞');
+  sw('burnRunwayBar',  runwayBar);
+  s('burnEfficiency',  efficiency + 'x');
+  sw('burnEfficiencyBar', effBar);
+
+  // Expense breakdown by category (from transactions this month)
+  const cats = {Payroll:0, Operations:0, Marketing:0, Software:0, Other:0};
+  transactions.filter(t => t.type==='expense').forEach(t => {
+    const c = monthBounds(0); const d = new Date(t.date);
+    if(d>=c.start && d<=c.end) {
+      const k = Object.keys(cats).find(k => t.cat===k) || 'Other';
+      cats[k] += Math.abs(t.amount);
+    }
+  });
+  s('burnExpPayroll',   formatMoney(cats.Payroll));
+  s('burnExpOps',       formatMoney(cats.Operations));
+  s('burnExpMarketing', formatMoney(cats.Marketing));
+  s('burnExpSoftware',  formatMoney(cats.Software));
+  s('burnExpOther',     formatMoney(cats.Other));
+
+  // AR-adjusted runway
+  const ar30 = getExpectedCollections(30);
+  const adjRunway = netBurn > 0 ? ((cashOnHand + ar30) / netBurn).toFixed(1) : null;
+  s('cashOnlyRunway',   netRunway < 900 ? netRunway.toFixed(1)+' months' : '∞');
+  s('arAdjustedRunway', adjRunway !== null ? adjRunway+' months' : '∞');
+}
+
+// ============================================================
+// === RECEIVABLES / INVOICES ===
+// ============================================================
+function genId() { return 'inv_'+Date.now()+'_'+Math.random().toString(36).slice(2,6); }
+
+function getArTotals() {
+  const open    = invoices.filter(i=>i.status==='open');
+  const overdue = invoices.filter(i=>i.status==='overdue');
+  return {
+    total: [...open,...overdue].reduce((s,i)=>s+(i.amountOutstanding||0),0),
+    openCount: open.length,
+    overdueCount: overdue.length,
+  };
+}
+
+function calcDSO() {
+  const cutoff = new Date(Date.now() - 90*86400000);
+  const sales = transactions.filter(t=>t.type==='income' && new Date(t.date)>=cutoff).reduce((s,t)=>s+t.amount,0);
+  const { total } = getArTotals();
+  return sales===0 ? null : Math.round((total/sales)*90);
+}
+
+function getExpectedCollections(days) {
+  const cutoff = new Date(Date.now() + days*86400000);
+  return invoices
+    .filter(i=>['open','overdue'].includes(i.status))
+    .filter(i=>new Date(i.expectedPaymentDate||i.dueDate)<=cutoff)
+    .reduce((s,i)=>s+(i.amountOutstanding||0),0);
+}
+
+function updateReceivablesSummary() {
+  const { total, openCount, overdueCount } = getArTotals();
+  const dso = calcDSO();
+  const s = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  s('arTotal',       formatMoney(total));
+  s('arOpenCount',   openCount);
+  s('arOverdueCount',overdueCount);
+  s('arDSO',         dso!==null ? dso+' days' : '—');
+  s('col30', formatMoney(getExpectedCollections(30)));
+  s('col60', formatMoney(getExpectedCollections(60)));
+  s('col90', formatMoney(getExpectedCollections(90)));
+  renderInvoices();
+}
+
+function renderInvoices() {
+  const tbody = document.getElementById('invoiceBody');
+  const empty = document.getElementById('invoiceEmpty');
+  if(!tbody) return;
+
+  const sort = document.getElementById('invoiceSort')?.value || 'dueDate';
+  const sorted = [...invoices].sort((a,b)=>{
+    if(sort==='amountOutstanding') return (b.amountOutstanding||0)-(a.amountOutstanding||0);
+    return String(a[sort]||'').localeCompare(String(b[sort]||''));
   });
 
-  // Forward Model
-  document.getElementById('fwdCash').value = 0;
-  document.getElementById('fwdRevenue').value = 0;
-  document.getElementById('fwdExpenses').value = 0;
-  document.getElementById('fwdGrowth').value = 0;
+  if(sorted.length===0) {
+    tbody.innerHTML=''; if(empty) empty.style.display='block'; return;
+  }
+  if(empty) empty.style.display='none';
+
+  const today = new Date().toISOString().split('T')[0];
+  tbody.innerHTML = sorted.map(inv => {
+    const isAtRisk = inv.status==='overdue' || (inv.status==='open' && inv.dueDate < today);
+    return `<tr>
+      <td>${inv.customer}</td>
+      <td style="font-family:var(--mono);color:var(--muted)">${inv.issueDate||''}</td>
+      <td style="font-family:var(--mono);color:${isAtRisk?'var(--danger)':'var(--muted)'}">${inv.dueDate||''}</td>
+      <td style="text-align:right;font-family:var(--mono)">${formatMoney(inv.amountIssued||0)}</td>
+      <td style="text-align:right;font-family:var(--mono);font-weight:500">${formatMoney(inv.amountOutstanding||0)}</td>
+      <td>
+        <select class="invoice-status status-${inv.status}" onchange="changeInvoiceStatus('${inv.id}',this.value)" ${sharedMode?'disabled':''}>
+          <option value="open"       ${inv.status==='open'      ?'selected':''}>Open</option>
+          <option value="overdue"    ${inv.status==='overdue'   ?'selected':''}>Overdue</option>
+          <option value="paid"       ${inv.status==='paid'      ?'selected':''}>Paid</option>
+          <option value="written_off"${inv.status==='written_off'?'selected':''}>Written Off</option>
+        </select>
+      </td>
+      <td>
+        <button class="hide-in-shared" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;margin-right:4px" onclick="editInvoice('${inv.id}')" aria-label="Edit invoice">✎</button>
+        <button class="hide-in-shared" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px" onclick="deleteInvoice('${inv.id}')" aria-label="Delete invoice">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function changeInvoiceStatus(id, newStatus) {
+  const inv = invoices.find(i=>i.id===id);
+  if(!inv) return;
+  const wasPaid = inv.status==='paid';
+  inv.status = newStatus;
+  if(newStatus==='paid' && !wasPaid && inv.amountOutstanding>0) {
+    if(confirm(`Mark ${inv.amountOutstanding > 0 ? formatMoney(inv.amountOutstanding) : 'this invoice'} as received income?`)) {
+      transactions.unshift({
+        id:'tx_'+genId(), date:new Date().toISOString().split('T')[0],
+        desc:`Invoice payment — ${inv.customer}`, cat:'Revenue', type:'income',
+        amount: inv.amountOutstanding
+      });
+      inv.amountOutstanding = 0;
+      saveTransactions();
+      updateMetrics();
+    }
+  }
+  saveInvoices();
+  updateReceivablesSummary();
+  updateBurnRateTab();
+}
+
+function deleteInvoice(id) {
+  if(!confirm('Delete this invoice?')) return;
+  const idx = invoices.findIndex(i=>i.id===id);
+  if(idx>=0) invoices.splice(idx,1);
+  saveInvoices();
+  updateReceivablesSummary();
+  updateBurnRateTab();
+}
+
+function editInvoice(id) {
+  const inv = invoices.find(i=>i.id===id);
+  if(!inv) return;
+  document.getElementById('invoiceModalTitle').textContent = 'Edit Invoice';
+  document.getElementById('invEditId').value = id;
+  document.getElementById('invCustomer').value = inv.customer||'';
+  document.getElementById('invAmountIssued').value = inv.amountIssued||'';
+  document.getElementById('invAmountOutstanding').value = inv.amountOutstanding||'';
+  document.getElementById('invIssueDate').value = inv.issueDate||'';
+  document.getElementById('invDueDate').value = inv.dueDate||'';
+  document.getElementById('invExpectedDate').value = inv.expectedPaymentDate||'';
+  document.getElementById('invStatus').value = inv.status||'open';
+  document.getElementById('invoiceModal').style.display='flex';
+}
+
+function openInvoiceModal() {
+  document.getElementById('invoiceModalTitle').textContent = 'Add Invoice';
+  document.getElementById('invEditId').value = '';
+  document.getElementById('invCustomer').value = '';
+  document.getElementById('invAmountIssued').value = '';
+  document.getElementById('invAmountOutstanding').value = '';
+  document.getElementById('invIssueDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('invDueDate').value = '';
+  document.getElementById('invExpectedDate').value = '';
+  document.getElementById('invStatus').value = 'open';
+  document.getElementById('invoiceModal').style.display='flex';
+  setTimeout(()=>document.getElementById('invCustomer').focus(),100);
+}
+
+function closeInvoiceModal() { document.getElementById('invoiceModal').style.display='none'; }
+
+function submitInvoiceModal() {
+  const customer = document.getElementById('invCustomer').value.trim();
+  const issued   = parseFloat(document.getElementById('invAmountIssued').value);
+  const outstanding = parseFloat(document.getElementById('invAmountOutstanding').value);
+  const issueDate   = document.getElementById('invIssueDate').value;
+  const dueDate     = document.getElementById('invDueDate').value;
+  const expDate     = document.getElementById('invExpectedDate').value;
+  const status      = document.getElementById('invStatus').value;
+  const editId      = document.getElementById('invEditId').value;
+
+  if(!customer) { alert('Please enter a customer name.'); return; }
+  if(isNaN(issued)||issued<0) { alert('Please enter a valid amount.'); return; }
+  if(!dueDate) { alert('Please enter a due date.'); return; }
+
+  const data = {
+    customer, amountIssued:issued,
+    amountOutstanding: isNaN(outstanding) ? issued : outstanding,
+    issueDate, dueDate,
+    expectedPaymentDate: expDate || null,
+    status,
+  };
+
+  if(editId) {
+    const idx = invoices.findIndex(i=>i.id===editId);
+    if(idx>=0) invoices[idx] = { ...invoices[idx], ...data };
+  } else {
+    invoices.unshift({ id: genId(), ...data });
+  }
+  saveInvoices();
+  closeInvoiceModal();
+  updateReceivablesSummary();
+  updateBurnRateTab();
+}
+
+// ============================================================
+// === TOAST ===
+// ============================================================
+function showToast(msg, type='success', duration=3500) {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>t.classList.add('show')); });
+  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),300); }, duration);
+}
+
+// ============================================================
+// === SHARE SCENARIO (Feature 3) ===
+// ============================================================
+let sharedMode = false;
+let sharedData = null;
+
+function shareScenario(key) {
+  const s = scenarioState[key];
+  const income   = sumTx(monthBounds(0).start, monthBounds(0).end, 'income');
+  const expenses = sumTx(monthBounds(0).start, monthBounds(0).end, 'expense');
+  const payload = {
+    v:1, s:key,
+    a:{ rev:s.rev, exp:s.exp, cust:s.cust, one:s.one },
+    snap:{ cash:cashOnHand, rev:income, exp:expenses },
+    cur:activeCurrency,
+    t:new Date().toISOString().slice(0,10),
+  };
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  const url = location.origin+location.pathname+'#scenario='+encoded;
+  if(navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(url).then(()=>showToast('Link copied — anyone with this link can view this scenario'));
+  } else {
+    prompt('Copy this link:', url);
+  }
+}
+
+function checkSharedLink() {
+  const hash = location.hash;
+  if(!hash.startsWith('#scenario=')) return;
+  try {
+    const encoded = hash.slice('#scenario='.length);
+    const json = decodeURIComponent(escape(atob(encoded)));
+    const data = JSON.parse(json);
+    if(data.v===1) enterSharedMode(data);
+  } catch(e) { console.warn('Invalid share link',e); }
+}
+
+function enterSharedMode(data) {
+  sharedMode = true; sharedData = data;
+  document.getElementById('sharedBanner').style.display='flex';
+  document.getElementById('sharedBannerDate').textContent = data.t||'unknown date';
+  document.querySelectorAll('.hide-in-shared').forEach(el=>el.style.display='none');
+  if(data.cur && CURRENCIES[data.cur]) {
+    activeCurrency = data.cur;
+    const sel = document.getElementById('currencySelect');
+    if(sel) sel.value = data.cur;
+  }
+  if(data.a && scenarioState[data.s]) Object.assign(scenarioState[data.s], data.a);
+  showTabDirect('scenario');
+  updateAllScenarios();
+}
+
+function exitSharedMode() {
+  sharedMode = false; sharedData = null;
+  document.getElementById('sharedBanner').style.display='none';
+  document.querySelectorAll('.hide-in-shared').forEach(el=>el.style.display='');
+  history.replaceState(null,'',location.pathname);
+}
+
+function cloneSharedScenario() {
+  if(!sharedData?.a) return;
+  Object.assign(scenarioState.custom, sharedData.a);
+  // Update custom sliders
+  const s = scenarioState.custom;
+  const setSlider = (prefix,key,val)=>{
+    const lk = {rev:'RevVal',exp:'ExpVal',cust:'CustVal',one:'OneVal'}[key];
+    const el = document.getElementById(prefix+lk);
+    if(el) {
+      if(key==='one') el.textContent=(val>=0?'+$':'-$')+Math.abs(val)+'K';
+      else if(key==='cust') el.textContent=(val>=0?'+':'')+val;
+      else el.textContent=(val>=0?'+':'')+val+'%';
+    }
+  };
+  ['rev','exp','cust','one'].forEach(k=>setSlider('custom',k,s[k]));
+  updateAllScenarios();
+  showToast('Scenario cloned to your Custom Scenario slot');
+  exitSharedMode();
+}
+
+// ============================================================
+// === SETTINGS & DEMO (Feature 4) ===
+// ============================================================
+function openSettings()  { document.getElementById('settingsModal').style.display='flex'; }
+function closeSettings() { document.getElementById('settingsModal').style.display='none'; }
+
+function dismissDemoBanner() { document.getElementById('demoBanner').style.display='none'; }
+
+function confirmLoadDemo() {
+  closeSettings();
+  if(!confirm('Load demo data? This replaces all current data.')) return;
+  loadDemoData();
+  document.getElementById('demoBanner').style.display='flex';
+  showToast('Demo data loaded — explore every feature!');
+}
+
+function clearAllData() {
+  closeSettings();
+  if(!confirm('Clear everything? All transactions, invoices, and settings will be wiped.')) return;
+
+  transactions.length = 0; invoices.length = 0;
+  saveCashOnHand(0); saveTransactions(); saveInvoices();
+  dismissedWarnings.clear();
+
+  // Reset forward model
+  ['fwdCash','fwdRevenue','fwdExpenses'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=0; });
+  const fg = document.getElementById('fwdGrowth'); if(fg) fg.value=0;
+
+  document.getElementById('demoBanner').style.display='none';
+  document.getElementById('warningSummaryBar').style.display='none';
+  document.getElementById('warningZone').innerHTML='';
+
+  refreshAll();
+  showToast('All data cleared', 'info');
+}
+
+function refreshAll() {
+  renderTransactions();
+  renderInvoices();
+  updateMetrics();
+  updateBurnRateTab();
+  updateReceivablesSummary();
   runForwardModel();
   updateAllScenarios();
 }
+
+// ============================================================
+// === FIRST VISIT ===
+// ============================================================
+function checkFirstVisit() {
+  if(!localStorage.getItem('cashlens.visited')) {
+    localStorage.setItem('cashlens.visited','1');
+    loadDemoData();
+    document.getElementById('demoBanner').style.display='flex';
+  }
+}
+
+// ============================================================
+// === CLEAR ALL (old stub — now delegates to full clearAllData) ===
+// ============================================================
+
 
 
 // === ADD ENTRY MODAL ===
@@ -1781,6 +2623,7 @@ function submitAddModal() {
     amount: currentTxType === 'income' ? amount : -amount
   };
   transactions.unshift(tx);
+  saveTransactions();
   renderTransactions();
   updateMetrics();
   closeAddModal();
@@ -1930,6 +2773,7 @@ function confirmCsvImport() {
 
   // Sort by date desc
   transactions.sort((a,b) => b.date.localeCompare(a.date));
+  saveTransactions();
   renderTransactions();
   updateMetrics();
   closeImportModal();
@@ -1984,11 +2828,29 @@ async function importFromSheets() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  renderTransactions();
+  // Restore currency preference
+  const savedCur = localStorage.getItem('cashlens.currency');
+  if(savedCur && CURRENCIES[savedCur]) {
+    activeCurrency = savedCur;
+    const sel = document.getElementById('currencySelect');
+    if(sel) sel.value = savedCur;
+  }
+
+  // Load persisted state
+  loadState();
+
+  // Check shared link first (before first-visit logic, to avoid overwriting visitor's data)
+  checkSharedLink();
+
+  // First visit → auto-load demo data
+  if(!sharedMode) checkFirstVisit();
+
+  // Restore forward model inputs from cashOnHand
+  const fc = document.getElementById('fwdCash');
+  if(fc && cashOnHand > 0 && fc.value==='48320') fc.value = cashOnHand;
+
   initCharts();
-  updateAllScenarios();
-  runForwardModel();
-  updateMetrics();
+  refreshAll();
 });
 </script>
 </body>
