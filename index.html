@@ -1,0 +1,1955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CashLens — AI Cash Flow Visibility</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0d12;
+    --surface: #111520;
+    --surface2: #181d2e;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --accent: #00e5a0;
+    --accent2: #3b82f6;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --success: #10b981;
+    --purple: #8b5cf6;
+    --mono: 'DM Mono', monospace;
+    --heading: 'Syne', sans-serif;
+    --body: 'DM Sans', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 14px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* === LAYOUT === */
+  .app { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+
+  .logo {
+    font-family: var(--heading);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    padding: 0 20px 24px;
+    letter-spacing: -0.5px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .logo span { color: var(--text); font-weight: 400; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(0,229,160,0.05); }
+  .nav-icon { font-size: 16px; width: 18px; text-align: center; }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .free-badge {
+    display: inline-block;
+    background: rgba(0,229,160,0.12);
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .main { flex: 1; padding: 32px; overflow-y: auto; }
+
+  /* === TABS === */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* === HEADER AREA === */
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .page-title { font-family: var(--heading); font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
+  .page-sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .btn:hover { background: rgba(255,255,255,0.05); }
+  .btn-accent {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .btn-accent:hover { background: #00cc8e; }
+
+  /* === METRIC CARDS === */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .metric-card.green::before { background: var(--accent); }
+  .metric-card.blue::before { background: var(--accent2); }
+  .metric-card.warn::before { background: var(--warn); }
+  .metric-card.danger::before { background: var(--danger); }
+
+  .metric-label { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .metric-value { font-family: var(--mono); font-size: 26px; font-weight: 500; letter-spacing: -1px; }
+  .metric-value.green { color: var(--accent); }
+  .metric-value.blue { color: var(--accent2); }
+  .metric-value.warn { color: var(--warn); }
+  .metric-value.danger { color: var(--danger); }
+  .metric-delta { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .metric-delta .up { color: var(--success); }
+  .metric-delta .down { color: var(--danger); }
+
+  /* === CHART CARDS === */
+  .chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .chart-title { font-family: var(--heading); font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .chart-sub { font-size: 11px; color: var(--muted); margin-bottom: 16px; }
+  .chart-wrap { position: relative; }
+
+  /* === AI PANEL === */
+  .ai-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .ai-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0,229,160,0.04);
+  }
+  .ai-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .ai-label { font-family: var(--heading); font-size: 13px; font-weight: 600; color: var(--accent); }
+
+  .ai-messages { padding: 16px 20px; max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+  .ai-msg {
+    background: rgba(0,229,160,0.05);
+    border: 1px solid rgba(0,229,160,0.15);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .ai-msg .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+  .tag-warn { background: rgba(245,158,11,0.15); color: var(--warn); }
+  .tag-good { background: rgba(0,229,160,0.12); color: var(--accent); }
+  .tag-info { background: rgba(59,130,246,0.15); color: var(--accent2); }
+  .tag-alert { background: rgba(239,68,68,0.15); color: var(--danger); }
+
+  .ai-input-row {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+  }
+  .ai-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 9px 14px;
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .ai-input::placeholder { color: var(--muted); }
+  .ai-input:focus { border-color: var(--accent); }
+
+  /* === DATA ENTRY TABLE === */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .data-table th {
+    text-align: left;
+    padding: 8px 12px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .data-table input, .data-table select {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .data-table input:focus, .data-table select:focus {
+    border-color: var(--accent);
+    background: rgba(0,229,160,0.05);
+  }
+  .data-table select { background: var(--surface2); }
+
+  .tag-income { color: var(--accent); }
+  .tag-expense { color: var(--danger); }
+
+  /* === SCENARIO SECTION === */
+  .scenario-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .scenario-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .scenario-card.active-scenario { border-color: var(--accent); background: rgba(0,229,160,0.04); }
+
+  .scenario-name { font-family: var(--heading); font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .scenario-desc { font-size: 12px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+
+  .slider-group { margin-bottom: 14px; }
+  .slider-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .slider-val { color: var(--text); font-family: var(--mono); font-weight: 500; }
+  input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 4px;
+    background: var(--border2);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+  }
+
+  .scenario-result {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .scenario-result-label { font-size: 11px; color: var(--muted); }
+  .scenario-result-val { font-family: var(--mono); font-size: 18px; font-weight: 500; }
+
+  /* === BURN RATE === */
+  .burn-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  .burn-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .runway-bar-wrap { margin: 16px 0; }
+  .runway-bar-bg { background: var(--surface2); border-radius: 20px; height: 8px; overflow: hidden; }
+  .runway-bar-fill { height: 100%; border-radius: 20px; transition: width 0.5s; }
+
+  .expense-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .expense-item:last-child { border-bottom: none; }
+  .expense-dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; display: inline-block; }
+
+  /* === FORWARD MODEL === */
+  .forward-controls {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .control-group label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 500; letter-spacing: 0.4px; text-transform: uppercase; }
+  .control-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .control-input:focus { border-color: var(--accent); }
+
+  /* === ALERTS === */
+  .alert {
+    display: flex;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .alert-warn { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); }
+  .alert-danger { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); }
+  .alert-success { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* live pulse indicator */
+  .live-dot { display: inline-block; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; margin-right: 6px; animation: pulse 1.5s infinite; vertical-align: middle; }
+
+  /* section divider */
+  .section-label { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .full-chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+
+  /* loading shimmer */
+  .ai-thinking {
+    display: flex;
+    gap: 4px;
+    padding: 8px 14px;
+    align-items: center;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .dot-flashing {
+    display: flex; gap: 4px;
+  }
+  .dot-flashing span {
+    width: 6px; height: 6px; background: var(--muted); border-radius: 50%;
+    animation: dotflash 1.2s infinite;
+  }
+  .dot-flashing span:nth-child(2) { animation-delay: 0.2s; }
+  .dot-flashing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dotflash { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
+
+  /* === SHORTAGE WARNINGS === */
+  .warning-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    animation: slideIn 0.3s ease;
+    position: relative;
+  }
+  @keyframes slideIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+  .warning-banner.critical { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.35); }
+  .warning-banner.warn     { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3); }
+  .warning-banner.info     { background: rgba(59,130,246,0.07); border: 1px solid rgba(59,130,246,0.25); }
+
+  .wb-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .wb-body { flex: 1; }
+  .wb-title { font-weight: 600; font-size: 13px; margin-bottom: 3px; }
+  .warning-banner.critical .wb-title { color: #ef4444; }
+  .warning-banner.warn     .wb-title { color: #f59e0b; }
+  .warning-banner.info     .wb-title { color: #3b82f6; }
+  .wb-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .wb-action { font-size: 11px; font-weight: 600; margin-top: 6px; cursor: pointer; text-decoration: underline; text-decoration-style: dotted; }
+  .warning-banner.critical .wb-action { color: #ef4444; }
+  .warning-banner.warn     .wb-action { color: #f59e0b; }
+  .warning-banner.info     .wb-action { color: #3b82f6; }
+
+  .wb-dismiss { position: absolute; top: 10px; right: 12px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; line-height: 1; padding: 0; }
+  .wb-dismiss:hover { color: var(--text); }
+
+  #warningZone { margin-bottom: 0; }
+  #warningZone:empty { display: none; }
+
+  .warning-summary-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .warning-summary-bar:hover { background: var(--surface2); }
+  .wsb-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .wsb-label { flex: 1; color: var(--text); font-weight: 500; }
+  .wsb-count { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .wsb-chevron { color: var(--muted); font-size: 11px; transition: transform 0.2s; }
+  .wsb-chevron.open { transform: rotate(180deg); }
+
+  .metric-card.flashing { animation: cardFlash 1.5s ease 2; }
+  @keyframes cardFlash { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+  /* === MODAL === */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; animation: fadeIn 0.15s ease;
+  }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border2);
+    border-radius: 16px; padding: 28px; width: 460px; max-width: 95vw;
+    animation: slideUp 0.2s ease;
+  }
+  @keyframes slideUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .modal-title { font-family: var(--heading); font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+  .modal-sub { font-size: 12px; color: var(--muted); margin-bottom: 22px; }
+  .form-row { margin-bottom: 14px; }
+  .form-row label { display: block; font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0.4px; text-transform: uppercase; margin-bottom: 6px; }
+  .form-input, .form-select {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 9px 12px; color: var(--text);
+    font-family: var(--body); font-size: 14px; outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--accent); }
+  .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+  .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 22px; justify-content: flex-end; }
+  .type-toggle { display: flex; gap: 0; border: 1px solid var(--border2); border-radius: 8px; overflow: hidden; }
+  .type-toggle button { flex: 1; padding: 8px; background: transparent; border: none; color: var(--muted); font-family: var(--body); font-size: 13px; cursor: pointer; font-weight: 500; transition: all 0.15s; }
+  .type-toggle button.active-income { background: rgba(0,229,160,0.15); color: var(--accent); }
+  .type-toggle button.active-expense { background: rgba(239,68,68,0.12); color: var(--danger); }
+
+  /* === CSV & SHEETS === */
+  .import-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .import-tab { padding: 8px 16px; font-size: 13px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.15s; font-weight: 500; }
+  .import-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .drop-zone {
+    border: 2px dashed var(--border2); border-radius: 12px;
+    padding: 36px 20px; text-align: center; cursor: pointer;
+    transition: all 0.2s; margin-bottom: 16px;
+  }
+  .drop-zone:hover, .drop-zone.dragging { border-color: var(--accent); background: rgba(0,229,160,0.04); }
+  .drop-zone-icon { font-size: 28px; margin-bottom: 10px; }
+  .drop-zone-label { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .drop-zone-sub { font-size: 12px; color: var(--muted); }
+
+  .sheets-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .sheets-input { flex: 1; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 9px 12px; color: var(--text); font-family: var(--mono); font-size: 12px; outline: none; transition: border-color 0.15s; }
+  .sheets-input:focus { border-color: var(--accent); }
+  .import-status { font-size: 12px; padding: 8px 12px; border-radius: 8px; margin-top: 8px; }
+  .import-status.ok { background: rgba(0,229,160,0.1); color: var(--accent); }
+  .import-status.err { background: rgba(239,68,68,0.1); color: var(--danger); }
+  .import-status.loading { background: rgba(59,130,246,0.1); color: var(--accent2); }
+
+  .col-map { margin: 12px 0; }
+  .col-map-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 12px; }
+  .col-map-label { width: 80px; color: var(--muted); font-weight: 500; }
+  .col-map-select { flex: 1; background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 5px 8px; color: var(--text); font-size: 12px; outline: none; }
+
+  /* import btn in header */
+  .btn-outline { background: transparent; border: 1px solid var(--border2); }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">Cash<span>Lens</span></div>
+  <nav>
+    <div class="nav-item active" onclick="showTab('tracker')">
+      <span class="nav-icon">◈</span> Live Tracker
+    </div>
+    <div class="nav-item" onclick="showTab('forward')">
+      <span class="nav-icon">◐</span> Forward Model
+    </div>
+    <div class="nav-item" onclick="showTab('burn')">
+      <span class="nav-icon">◉</span> Burn Rate
+    </div>
+    <div class="nav-item" onclick="showTab('scenario')">
+      <span class="nav-icon">◑</span> Scenario Planning
+    </div>
+    <div class="nav-item" onclick="showTab('ai')">
+      <span class="nav-icon">✦</span> AI Advisor
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="free-badge">FREE FOR SMBs</div>
+    <div>CashLens gives small businesses enterprise-grade cash flow intelligence at no cost.</div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+<!-- ============ LIVE TRACKER ============ -->
+<div id="tab-tracker" class="tab-content active">
+  <div class="page-header">
+    <div>
+      <div class="page-title"><span class="live-dot"></span>Live Cash Flow Tracker</div>
+      <div class="page-sub">Real-time monitoring · Updated just now</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" onclick="openImportModal()">⬆ Import</button>
+      <button class="btn" onclick="openAddModal()">+ Add Entry</button>
+      <button class="btn btn-accent" onclick="analyzeWithAI()">✦ AI Analyze</button>
+    </div>
+  </div>
+
+  <!-- Warning Zone -->
+  <div id="warningSummaryBar" class="warning-summary-bar" onclick="toggleWarnings()" style="display:none">
+    <div class="wsb-dot" id="wsbDot"></div>
+    <div class="wsb-label" id="wsbLabel"></div>
+    <div class="wsb-count" id="wsbCount"></div>
+    <div class="wsb-chevron" id="wsbChevron">▼</div>
+  </div>
+  <div id="warningZone" style="margin-bottom:16px"></div>
+
+  <!-- Metrics -->
+  <div class="metric-grid">
+    <div class="metric-card green">
+      <div class="metric-label">Cash on Hand</div>
+      <div class="metric-value green" id="cashOnHand">$48,320</div>
+      <div class="metric-delta"><span class="up">↑ 12.4%</span> vs last month</div>
+    </div>
+    <div class="metric-card blue">
+      <div class="metric-label">Monthly Inflow</div>
+      <div class="metric-value blue" id="monthlyIn">$31,450</div>
+      <div class="metric-delta"><span class="up">↑ 8.1%</span> vs last month</div>
+    </div>
+    <div class="metric-card warn">
+      <div class="metric-label">Monthly Outflow</div>
+      <div class="metric-value warn" id="monthlyOut">$22,180</div>
+      <div class="metric-delta"><span class="down">↑ 3.2%</span> spending increase</div>
+    </div>
+    <div class="metric-card green">
+      <div class="metric-label">Net Cash Flow</div>
+      <div class="metric-value green" id="netFlow">+$9,270</div>
+      <div class="metric-delta"><span class="up">↑ 18.6%</span> improvement</div>
+    </div>
+  </div>
+
+  <!-- Chart + Breakdown -->
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">Cash Flow — 12 Month View</div>
+      <div class="chart-sub">Income vs Expenses with net cash position</div>
+      <div class="chart-wrap" style="height:230px">
+        <canvas id="flowChart" role="img" aria-label="12-month cash flow chart showing monthly income and expenses">Monthly cash flow data</canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Expense Breakdown</div>
+      <div class="chart-sub">Current month categories</div>
+      <div class="chart-wrap" style="height:180px">
+        <canvas id="expenseDonut" role="img" aria-label="Donut chart showing expense breakdown by category">Expense category breakdown</canvas>
+      </div>
+      <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;font-size:11px;color:var(--muted)">
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#3b82f6;margin-right:4px"></span>Payroll 42%</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#8b5cf6;margin-right:4px"></span>Ops 23%</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#f59e0b;margin-right:4px"></span>Marketing 18%</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#ef4444;margin-right:4px"></span>Software 11%</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#10b981;margin-right:4px"></span>Other 6%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transaction Log -->
+  <div class="section-label">Recent transactions</div>
+  <div class="chart-card" style="margin-bottom:0">
+    <table class="data-table" id="txTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Category</th>
+          <th>Type</th>
+          <th style="text-align:right">Amount</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="txBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============ FORWARD MODEL ============ -->
+<div id="tab-forward" class="tab-content">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Forward Cash Flow Model</div>
+      <div class="page-sub">AI-powered 12-month projection based on your inputs</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-accent" onclick="runForwardModel()">↻ Recalculate</button>
+    </div>
+  </div>
+
+  <div class="forward-controls">
+    <div class="control-group">
+      <label>Starting Cash</label>
+      <input class="control-input" id="fwdCash" type="number" value="48320" oninput="runForwardModel()">
+    </div>
+    <div class="control-group">
+      <label>Monthly Revenue</label>
+      <input class="control-input" id="fwdRevenue" type="number" value="31450" oninput="runForwardModel()">
+    </div>
+    <div class="control-group">
+      <label>Monthly Expenses</label>
+      <input class="control-input" id="fwdExpenses" type="number" value="22180" oninput="runForwardModel()">
+    </div>
+    <div class="control-group">
+      <label>Growth Rate %/mo</label>
+      <input class="control-input" id="fwdGrowth" type="number" value="3" step="0.5" oninput="runForwardModel()">
+    </div>
+  </div>
+
+  <!-- Forward projection metrics -->
+  <div class="metric-grid" style="grid-template-columns: repeat(4,1fr); margin-bottom: 20px">
+    <div class="metric-card green">
+      <div class="metric-label">Projected 3-Mo Cash</div>
+      <div class="metric-value green" id="proj3mo">—</div>
+    </div>
+    <div class="metric-card blue">
+      <div class="metric-label">Projected 6-Mo Cash</div>
+      <div class="metric-value blue" id="proj6mo">—</div>
+    </div>
+    <div class="metric-card green">
+      <div class="metric-label">Projected 12-Mo Cash</div>
+      <div class="metric-value green" id="proj12mo">—</div>
+    </div>
+    <div class="metric-card warn">
+      <div class="metric-label">Break-even Month</div>
+      <div class="metric-value warn" id="projBreak">N/A</div>
+    </div>
+  </div>
+
+  <div class="full-chart-card">
+    <div class="chart-title">12-Month Cash Position Forecast</div>
+    <div class="chart-sub">Base case projection with confidence band</div>
+    <div class="chart-wrap" style="height:260px">
+      <canvas id="forwardChart" role="img" aria-label="12-month forward cash flow projection chart">Forward projection</canvas>
+    </div>
+  </div>
+
+  <div class="alert alert-success">
+    <div class="alert-icon">✓</div>
+    <div id="forwardInsight">Based on current inputs, your business shows positive cash trajectory. Revenue growing faster than expenses.</div>
+  </div>
+</div>
+
+<!-- ============ BURN RATE ============ -->
+<div id="tab-burn" class="tab-content">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Burn Rate Monitor</div>
+      <div class="page-sub">Understand your cash consumption rate and runway</div>
+    </div>
+  </div>
+
+  <div class="burn-grid">
+    <div class="burn-card">
+      <div class="metric-label">Monthly Burn Rate</div>
+      <div class="metric-value danger" style="margin: 8px 0">$22,180</div>
+      <div class="metric-delta" style="margin-bottom:16px">Gross burn (all expenses)</div>
+      <div class="runway-bar-wrap">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px">
+          <span>Net burn: $12,910/mo</span><span>After revenue</span>
+        </div>
+        <div class="runway-bar-bg"><div class="runway-bar-fill" style="width:41%;background:var(--danger)"></div></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px">Net burn is 41% of gross burn — healthy ratio</div>
+    </div>
+
+    <div class="burn-card">
+      <div class="metric-label">Cash Runway</div>
+      <div class="metric-value" style="margin: 8px 0; color: var(--warn)">3.7 months</div>
+      <div class="metric-delta" style="margin-bottom:16px">At current net burn rate</div>
+      <div class="runway-bar-wrap">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px">
+          <span>Danger zone</span><span>Safe zone</span>
+        </div>
+        <div class="runway-bar-bg">
+          <div class="runway-bar-fill" style="width:37%;background:linear-gradient(90deg, var(--danger) 0%, var(--warn) 50%, var(--accent) 100%)"></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--warn);margin-top:8px">⚠ Target minimum 6 months runway</div>
+    </div>
+
+    <div class="burn-card">
+      <div class="metric-label">Burn Efficiency</div>
+      <div class="metric-value green" style="margin: 8px 0">1.42x</div>
+      <div class="metric-delta" style="margin-bottom:16px">Revenue per dollar burned</div>
+      <div class="runway-bar-wrap">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px">
+          <span>1.0x breakeven</span><span>2.0x excellent</span>
+        </div>
+        <div class="runway-bar-bg"><div class="runway-bar-fill" style="width:70%;background:var(--accent)"></div></div>
+      </div>
+      <div style="font-size:11px;color:var(--accent);margin-top:8px">✓ Above 1.0x — generating positive returns</div>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">Burn Rate Trend — 6 Months</div>
+      <div class="chart-sub">Gross vs net burn over time</div>
+      <div class="chart-wrap" style="height:210px">
+        <canvas id="burnChart" role="img" aria-label="6-month burn rate trend chart">Burn rate trend</canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Top Expense Categories</div>
+      <div class="chart-sub">Where your cash goes</div>
+      <div style="margin-top:8px">
+        <div class="expense-item">
+          <div><span class="expense-dot" style="background:#3b82f6"></span>Payroll & Benefits</div>
+          <div style="text-align:right">
+            <div style="font-family:var(--mono);font-size:14px">$9,316</div>
+            <div style="font-size:11px;color:var(--muted)">42%</div>
+          </div>
+        </div>
+        <div class="expense-item">
+          <div><span class="expense-dot" style="background:#8b5cf6"></span>Operations & Rent</div>
+          <div style="text-align:right">
+            <div style="font-family:var(--mono);font-size:14px">$5,101</div>
+            <div style="font-size:11px;color:var(--muted)">23%</div>
+          </div>
+        </div>
+        <div class="expense-item">
+          <div><span class="expense-dot" style="background:#f59e0b"></span>Marketing & Ads</div>
+          <div style="text-align:right">
+            <div style="font-family:var(--mono);font-size:14px">$3,993</div>
+            <div style="font-size:11px;color:var(--muted)">18%</div>
+          </div>
+        </div>
+        <div class="expense-item">
+          <div><span class="expense-dot" style="background:#ef4444"></span>Software & Tools</div>
+          <div style="text-align:right">
+            <div style="font-family:var(--mono);font-size:14px">$2,440</div>
+            <div style="font-size:11px;color:var(--muted)">11%</div>
+          </div>
+        </div>
+        <div class="expense-item">
+          <div><span class="expense-dot" style="background:#10b981"></span>Other</div>
+          <div style="text-align:right">
+            <div style="font-family:var(--mono);font-size:14px">$1,331</div>
+            <div style="font-size:11px;color:var(--muted)">6%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-warn">
+    <div class="alert-icon">⚠</div>
+    <div>Your runway is below the recommended 6-month threshold. Consider accelerating collections or identifying non-essential expenses to reduce monthly burn by ~$3,000.</div>
+  </div>
+</div>
+
+<!-- ============ SCENARIO PLANNING ============ -->
+<div id="tab-scenario" class="tab-content">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Scenario Planning</div>
+      <div class="page-sub">Model best, base, and worst-case futures for your business</div>
+    </div>
+  </div>
+
+  <div class="scenario-grid">
+    <!-- Best Case -->
+    <div class="scenario-card" id="sc-best">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div class="scenario-name">🚀 Best Case</div>
+        <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(0,229,160,0.12);color:var(--accent);font-weight:600">OPTIMISTIC</span>
+      </div>
+      <div class="scenario-desc">Revenue surges, expenses stay controlled. Major client wins or product breakthrough.</div>
+      <div class="slider-group">
+        <div class="slider-label"><span>Revenue Growth</span><span class="slider-val" id="bestRevVal">+25%</span></div>
+        <input type="range" min="-20" max="50" value="25" oninput="updateScenario('best','rev',this.value)">
+      </div>
+      <div class="slider-group">
+        <div class="slider-label"><span>Expense Change</span><span class="slider-val" id="bestExpVal">+5%</span></div>
+        <input type="range" min="-30" max="50" value="5" oninput="updateScenario('best','exp',this.value)">
+      </div>
+      <div class="slider-group">
+        <div class="slider-label"><span>New Customers</span><span class="slider-val" id="bestCustVal">+12</span></div>
+        <input type="range" min="0" max="30" value="12" oninput="updateScenario('best','cust',this.value)">
+      </div>
+      <div class="scenario-result">
+        <div><div class="scenario-result-label">12-Mo Cash Position</div><div class="scenario-result-val" id="bestResult" style="color:var(--accent)">—</div></div>
+        <div><div class="scenario-result-label">Runway</div><div class="scenario-result-val" id="bestRunway" style="color:var(--accent)">—</div></div>
+      </div>
+    </div>
+
+    <!-- Base Case -->
+    <div class="scenario-card active-scenario" id="sc-base">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div class="scenario-name">📊 Base Case</div>
+        <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(0,229,160,0.15);color:var(--accent);font-weight:600">CURRENT</span>
+      </div>
+      <div class="scenario-desc">Steady growth continuing the current trend. No major surprises either way.</div>
+      <div class="slider-group">
+        <div class="slider-label"><span>Revenue Growth</span><span class="slider-val" id="baseRevVal">+8%</span></div>
+        <input type="range" min="-20" max="50" value="8" oninput="updateScenario('base','rev',this.value)">
+      </div>
+      <div class="slider-group">
+        <div class="slider-label"><span>Expense Change</span><span class="slider-val" id="baseExpVal">+3%</span></div>
+        <input type="range" min="-30" max="50" value="3" oninput="updateScenario('base','exp',this.value)">
+      </div>
+      <div class="slider-group">
+        <div class="slider-label"><span>New Customers</span><span class="slider-val" id="baseCustVal">+4</span></div>
+        <input type="range" min="0" max="30" value="4" oninput="updateScenario('base','cust',this.value)">
+      </div>
+      <div class="scenario-result">
+        <div><div class="scenario-result-label">12-Mo Cash Position</div><div class="scenario-result-val" id="baseResult" style="color:var(--accent2)">—</div></div>
+        <div><div class="scenario-result-label">Runway</div><div class="scenario-result-val" id="baseRunway" style="color:var(--accent2)">—</div></div>
+      </div>
+    </div>
+
+    <!-- Worst Case -->
+    <div class="scenario-card" id="sc-worst">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div class="scenario-name">⚠️ Worst Case</div>
+        <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(239,68,68,0.12);color:var(--danger);font-weight:600">STRESS TEST</span>
+      </div>
+      <div class="scenario-desc">Major client loss, economic downturn, or unexpected costs hit simultaneously.</div>
+      <div class="slider-group">
+        <div class="slider-label"><span>Revenue Change</span><span class="slider-val" id="worstRevVal">-20%</span></div>
+        <input type="range" min="-50" max="20" value="-20" oninput="updateScenario('worst','rev',this.value)">
+      </div>
+      <div class="slider-group">
+        <div class="slider-label"><span>Expense Change</span><span class="slider-val" id="worstExpVal">+15%</span></div>
+        <input type="range" min="-10" max="50" value="15" oninput="updateScenario('worst','exp',this.value)">
+      </div>
+      <div class="slider-group">
+        <div class="slider-label"><span>Customer Churn</span><span class="slider-val" id="worstCustVal">-8</span></div>
+        <input type="range" min="-20" max="0" value="-8" oninput="updateScenario('worst','cust',this.value)">
+      </div>
+      <div class="scenario-result">
+        <div><div class="scenario-result-label">12-Mo Cash Position</div><div class="scenario-result-val" id="worstResult" style="color:var(--danger)">—</div></div>
+        <div><div class="scenario-result-label">Runway</div><div class="scenario-result-val" id="worstRunway" style="color:var(--danger)">—</div></div>
+      </div>
+    </div>
+
+    <!-- Custom -->
+    <div class="scenario-card" id="sc-custom">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div class="scenario-name">🔧 Custom Scenario</div>
+        <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(139,92,246,0.12);color:var(--purple);font-weight:600">USER DEFINED</span>
+      </div>
+      <div class="scenario-desc">Build your own what-if scenario based on specific business events.</div>
+      <div class="slider-group">
+        <div class="slider-label"><span>Revenue Change</span><span class="slider-val" id="customRevVal">+15%</span></div>
+        <input type="range" min="-50" max="100" value="15" oninput="updateScenario('custom','rev',this.value)">
+      </div>
+      <div class="slider-group">
+        <div class="slider-label"><span>Expense Change</span><span class="slider-val" id="customExpVal">+20%</span></div>
+        <input type="range" min="-30" max="100" value="20" oninput="updateScenario('custom','exp',this.value)">
+      </div>
+      <div class="slider-group">
+        <div class="slider-label"><span>One-time Event ($K)</span><span class="slider-val" id="customOneVal">+$10K</span></div>
+        <input type="range" min="-50" max="100" value="10" oninput="updateScenario('custom','one',this.value)">
+      </div>
+      <div class="scenario-result">
+        <div><div class="scenario-result-label">12-Mo Cash Position</div><div class="scenario-result-val" id="customResult" style="color:var(--purple)">—</div></div>
+        <div><div class="scenario-result-label">Runway</div><div class="scenario-result-val" id="customRunway" style="color:var(--purple)">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="full-chart-card">
+    <div class="chart-title">Scenario Comparison — 12-Month Cash Position</div>
+    <div class="chart-sub">All scenarios plotted together</div>
+    <div class="chart-wrap" style="height:250px">
+      <canvas id="scenarioChart" role="img" aria-label="Scenario comparison chart showing best, base, worst, and custom case projections">Scenario comparison</canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ============ AI ADVISOR ============ -->
+<div id="tab-ai" class="tab-content">
+  <div class="page-header">
+    <div>
+      <div class="page-title">✦ AI Cash Flow Advisor</div>
+      <div class="page-sub">Powered by RunDesk · Ask anything about your cash flow</div>
+    </div>
+  </div>
+
+  <div class="ai-panel" style="margin-bottom:0">
+    <div class="ai-header">
+      <div class="ai-dot"></div>
+      <div class="ai-label">CashLens AI</div>
+      <div style="margin-left:auto;font-size:11px;color:var(--muted)">Analyzing your business data</div>
+    </div>
+    <div class="ai-messages" id="aiMessages">
+      <div class="ai-msg">
+        <div class="tag tag-good">INSIGHT</div><br>
+        Your cash flow is healthy with a net positive of $9,270 this month. Revenue growth is outpacing expense growth — a strong signal. However, your 3.7-month runway is below the recommended 6-month buffer for small businesses.
+      </div>
+      <div class="ai-msg">
+        <div class="tag tag-warn">ACTION NEEDED</div><br>
+        Marketing spend increased 18% this month without proportional revenue growth. Consider reviewing your CAC (customer acquisition cost) to ensure ROI is positive.
+      </div>
+      <div class="ai-msg">
+        <div class="tag tag-info">FORECAST</div><br>
+        At your current 3% monthly growth rate, you'll reach $75,000 cash on hand within 6 months. To hit $100K, you'd need ~4.5% monthly growth or reduce expenses by $1,500/month.
+      </div>
+    </div>
+    <div class="ai-input-row">
+      <input class="ai-input" id="aiUserInput" type="text" placeholder="Ask: What if I hire 2 more staff? / How do I extend my runway? / Where should I cut costs?" onkeydown="if(event.key==='Enter')sendAIMessage()">
+      <button class="btn btn-accent" onclick="sendAIMessage()">Ask ↗</button>
+    </div>
+  </div>
+
+  <!-- Quick prompts -->
+  <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">
+    <button class="btn" style="font-size:12px" onclick="quickPrompt('How can I extend my runway to 6 months?')">Extend my runway</button>
+    <button class="btn" style="font-size:12px" onclick="quickPrompt('What is my break-even point?')">Find break-even</button>
+    <button class="btn" style="font-size:12px" onclick="quickPrompt('Where can I reduce expenses?')">Cut expenses</button>
+    <button class="btn" style="font-size:12px" onclick="quickPrompt('Should I raise prices or get more customers?')">Growth strategy</button>
+    <button class="btn" style="font-size:12px" onclick="quickPrompt('What happens if I lose my biggest client?')">Risk analysis</button>
+  </div>
+</div>
+
+<!-- ============ ADD ENTRY MODAL ============ -->
+<div id="addModal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)closeAddModal()">
+  <div class="modal">
+    <div class="modal-title">Add Transaction</div>
+    <div class="modal-sub">Log a new income or expense entry</div>
+
+    <div class="form-row">
+      <label>Type</label>
+      <div class="type-toggle">
+        <button id="typeIncome" class="active-income" onclick="setTxType('income')">↑ Income</button>
+        <button id="typeExpense" onclick="setTxType('expense')">↓ Expense</button>
+      </div>
+    </div>
+
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label>Date</label>
+        <input class="form-input" type="date" id="txDate">
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>Amount ($)</label>
+        <input class="form-input" type="number" id="txAmount" placeholder="0.00" min="0" step="0.01">
+      </div>
+    </div>
+
+    <div class="form-row" style="margin-top:14px">
+      <label>Description</label>
+      <input class="form-input" type="text" id="txDesc" placeholder="e.g. Client Invoice #1048 — Acme Corp">
+    </div>
+
+    <div class="form-row">
+      <label>Category</label>
+      <select class="form-select" id="txCat">
+        <option>Revenue</option>
+        <option>Consulting</option>
+        <option>Payroll</option>
+        <option>Operations</option>
+        <option>Marketing</option>
+        <option>Software</option>
+        <option>Rent</option>
+        <option>Tax</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-accent" onclick="submitAddModal()">Add Transaction</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ IMPORT MODAL ============ -->
+<div id="importModal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)closeImportModal()">
+  <div class="modal" style="width:520px">
+    <div class="modal-title">Import Transactions</div>
+    <div class="modal-sub">Connect a data source to populate your tracker automatically</div>
+
+    <div class="import-tabs">
+      <div class="import-tab active" id="itab-csv" onclick="switchImportTab('csv')">CSV Upload</div>
+      <div class="import-tab" id="itab-sheets" onclick="switchImportTab('sheets')">Google Sheets</div>
+      <div class="import-tab" id="itab-info" onclick="switchImportTab('info')">Other Apps</div>
+    </div>
+
+    <!-- CSV TAB -->
+    <div id="importPane-csv">
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('csvFileInput').click()"
+           ondragover="event.preventDefault();this.classList.add('dragging')"
+           ondragleave="this.classList.remove('dragging')"
+           ondrop="handleCsvDrop(event)">
+        <div class="drop-zone-icon">📂</div>
+        <div class="drop-zone-label">Drop your CSV here or click to browse</div>
+        <div class="drop-zone-sub">Exports from QuickBooks, Wave, Xero, FreshBooks, or your bank all work</div>
+        <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleCsvFile(this.files[0])">
+      </div>
+
+      <div id="colMapSection" style="display:none">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Map your CSV columns — we auto-detected these:</div>
+        <div class="col-map">
+          <div class="col-map-row"><div class="col-map-label">Date</div><select class="col-map-select" id="mapDate"></select></div>
+          <div class="col-map-row"><div class="col-map-label">Description</div><select class="col-map-select" id="mapDesc"></select></div>
+          <div class="col-map-row"><div class="col-map-label">Amount</div><select class="col-map-select" id="mapAmount"></select></div>
+          <div class="col-map-row"><div class="col-map-label">Type</div><select class="col-map-select" id="mapType"><option value="auto">Auto-detect (positive=income)</option></select></div>
+          <div class="col-map-row"><div class="col-map-label">Category</div><select class="col-map-select" id="mapCat"><option value="none">— none —</option></select></div>
+        </div>
+        <div id="csvPreviewInfo" class="import-status ok"></div>
+      </div>
+
+      <div id="csvStatus"></div>
+    </div>
+
+    <!-- SHEETS TAB -->
+    <div id="importPane-sheets" style="display:none">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">
+        Paste a Google Sheets URL that is set to <strong style="color:var(--text)">"Anyone with the link can view"</strong>. CashLens will read your transactions automatically.
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Expected columns (in any order): <code style="color:var(--accent2);font-size:11px">Date, Description, Amount, Type, Category</code></div>
+      <div class="sheets-row">
+        <input class="sheets-input" id="sheetsUrl" placeholder="https://docs.google.com/spreadsheets/d/...">
+        <button class="btn btn-accent" onclick="importFromSheets()" style="white-space:nowrap">Sync ↻</button>
+      </div>
+      <div id="sheetsStatus"></div>
+      <div style="margin-top:16px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px;color:var(--muted);line-height:1.6">
+        <strong style="color:var(--text);display:block;margin-bottom:4px">How to set up your Sheet:</strong>
+        1. Open your Google Sheet → Share → Change to "Anyone with the link"<br>
+        2. Set permission to <em>Viewer</em><br>
+        3. Copy the link and paste it above<br>
+        4. Click Sync — your transactions import instantly
+      </div>
+    </div>
+
+    <!-- INFO TAB -->
+    <div id="importPane-info" style="display:none">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px">QuickBooks / Xero / FreshBooks</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5">Export a transaction report as CSV, then use the CSV Upload tab. Go to Reports → Transaction List → Export → CSV.</div>
+        </div>
+        <div style="padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px">Wave Accounting</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5">Accounting → Transactions → Export → CSV. Then upload via the CSV tab above.</div>
+        </div>
+        <div style="padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px">Bank Statements</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5">Most banks let you download transactions as CSV from your account dashboard. CashLens auto-detects debits and credits.</div>
+        </div>
+        <div style="padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);border-left:3px solid var(--purple)">
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px">Direct API connections <span style="font-size:10px;color:var(--purple);font-weight:500;margin-left:6px">Coming soon</span></div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5">One-click OAuth sync with QuickBooks, Wave, and Xero is on our roadmap. Free forever for small businesses.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" onclick="closeImportModal()">Close</button>
+      <button class="btn btn-accent" id="importConfirmBtn" onclick="confirmCsvImport()" style="display:none">Import Transactions</button>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+// === NAV ===
+function showTab(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(name === 'forward') runForwardModel();
+  if(name === 'scenario') updateAllScenarios();
+}
+
+// === SAMPLE TRANSACTIONS ===
+const transactions = [
+  {date:'2025-05-17',desc:'Stripe Revenue — May batch',cat:'Revenue',type:'income',amount:8420},
+  {date:'2025-05-16',desc:'AWS hosting & services',cat:'Software',type:'expense',amount:-890},
+  {date:'2025-05-15',desc:'Client Invoice #1047 — Acme Corp',cat:'Revenue',type:'income',amount:5500},
+  {date:'2025-05-14',desc:'Payroll run — 4 staff',cat:'Payroll',type:'expense',amount:-9316},
+  {date:'2025-05-13',desc:'Google Ads campaign',cat:'Marketing',type:'expense',amount:-1200},
+  {date:'2025-05-12',desc:'Consulting retainer — DataCo',cat:'Revenue',type:'income',amount:3200},
+  {date:'2025-05-10',desc:'Office rent — May',cat:'Operations',type:'expense',amount:-2800},
+  {date:'2025-05-09',desc:'SaaS tools bundle',cat:'Software',type:'expense',amount:-340},
+];
+
+function renderTransactions() {
+  const tbody = document.getElementById('txBody');
+  tbody.innerHTML = transactions.map((t,i) => `
+    <tr>
+      <td style="font-family:var(--mono);color:var(--muted)">${t.date}</td>
+      <td>${t.desc}</td>
+      <td><span style="font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:20px;color:var(--muted)">${t.cat}</span></td>
+      <td><span style="font-size:11px;font-weight:500" class="${t.type==='income'?'tag-income':'tag-expense'}">${t.type==='income'?'↑ Income':'↓ Expense'}</span></td>
+      <td style="text-align:right;font-family:var(--mono);font-weight:500" class="${t.type==='income'?'tag-income':'tag-expense'}">
+        ${t.type==='income'?'+':''} $${Math.abs(t.amount).toLocaleString()}
+      </td>
+      <td><button style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px" onclick="removeTransaction(${i})">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+function addTransaction() {
+  const newTx = {
+    date: new Date().toISOString().split('T')[0],
+    desc: 'New transaction',
+    cat: 'Revenue',
+    type: 'income',
+    amount: 1000
+  };
+  transactions.unshift(newTx);
+  renderTransactions();
+  updateMetrics();
+}
+
+function removeTransaction(i) {
+  transactions.splice(i, 1);
+  renderTransactions();
+  updateMetrics();
+}
+
+const CASH_ON_HAND = 48320;
+const MONTHLY_EXPENSES_BASE = 22180;
+
+function updateMetrics() {
+  const income = transactions.filter(t=>t.type==='income').reduce((a,t)=>a+t.amount,0);
+  const expenses = Math.abs(transactions.filter(t=>t.type==='expense').reduce((a,t)=>a+t.amount,0));
+  const net = income - expenses;
+  document.getElementById('monthlyIn').textContent = '$' + income.toLocaleString();
+  document.getElementById('monthlyOut').textContent = '$' + expenses.toLocaleString();
+  document.getElementById('netFlow').textContent = (net >= 0 ? '+' : '') + '$' + net.toLocaleString();
+  runWarningEngine(income, expenses, net);
+}
+
+// === WARNING ENGINE ===
+let warningsOpen = true;
+const dismissedWarnings = new Set();
+
+function toggleWarnings() {
+  warningsOpen = !warningsOpen;
+  document.getElementById('warningZone').style.display = warningsOpen ? 'block' : 'none';
+  const chevron = document.getElementById('wsbChevron');
+  if(chevron) chevron.classList.toggle('open', warningsOpen);
+}
+
+function runWarningEngine(income, expenses, net) {
+  const cash = CASH_ON_HAND;
+  const runway = expenses > 0 ? (cash / expenses) : 999;
+  const burnRatio = income > 0 ? expenses / income : 999;
+  const expenseChange = ((expenses - MONTHLY_EXPENSES_BASE) / MONTHLY_EXPENSES_BASE) * 100;
+
+  const warnings = [];
+
+  // CRITICAL: Cash nearly gone
+  if (cash < expenses) {
+    warnings.push({
+      id: 'cash-critical',
+      level: 'critical',
+      icon: '🔴',
+      title: 'Critical: Cash below one month of expenses',
+      desc: `You have $${cash.toLocaleString()} on hand but $${expenses.toLocaleString()} in monthly expenses. You may not be able to cover next month's bills without immediate action.`,
+      action: 'Get AI recommendations →',
+      actionFn: "quickPrompt('I have a cash emergency — what are my immediate options to survive the next 30 days?')"
+    });
+  }
+
+  // CRITICAL: Negative net flow
+  if (net < 0) {
+    warnings.push({
+      id: 'negative-flow',
+      level: 'critical',
+      icon: '🔴',
+      title: 'Negative cash flow this period',
+      desc: `Expenses exceed income by $${Math.abs(net).toLocaleString()}. If this continues, your cash reserves will deplete in ${(cash / Math.abs(net)).toFixed(1)} months.`,
+      action: 'Model this in Scenario Planning →',
+      actionFn: "showTabDirect('scenario')"
+    });
+  }
+
+  // WARNING: Runway under 3 months
+  if (runway < 3 && runway >= 0) {
+    warnings.push({
+      id: 'runway-danger',
+      level: 'critical',
+      icon: '⏱',
+      title: `Only ${runway.toFixed(1)} months of runway remaining`,
+      desc: `At your current burn rate, cash runs out ${getRunwayDate(runway)}. Minimum safe runway for small businesses is 6 months.`,
+      action: 'See burn rate details →',
+      actionFn: "showTabDirect('burn')"
+    });
+  } else if (runway < 6) {
+    warnings.push({
+      id: 'runway-warn',
+      level: 'warn',
+      icon: '⚠️',
+      title: `Runway at ${runway.toFixed(1)} months — below the 6-month target`,
+      desc: `You have a buffer, but it's thinner than recommended. Focus on increasing collections or trimming variable expenses to build a bigger cushion.`,
+      action: 'Run a scenario →',
+      actionFn: "showTabDirect('scenario')"
+    });
+  }
+
+  // WARNING: Expenses spiking
+  if (expenseChange > 15) {
+    warnings.push({
+      id: 'expense-spike',
+      level: 'warn',
+      icon: '📈',
+      title: `Expenses up ${expenseChange.toFixed(0)}% vs baseline`,
+      desc: `Your spending has increased significantly. Uncontrolled expense growth can erode profit margins even when revenue looks healthy.`,
+      action: 'Ask AI where to cut →',
+      actionFn: "quickPrompt('My expenses spiked — help me identify what to cut without hurting growth')"
+    });
+  }
+
+  // WARNING: Burn ratio > 80%
+  if (burnRatio > 0.8 && burnRatio < 1) {
+    warnings.push({
+      id: 'burn-ratio',
+      level: 'warn',
+      icon: '🔥',
+      title: `Spending ${Math.round(burnRatio*100)}% of revenue — margin is thin`,
+      desc: `Less than 20% of your income is becoming profit. Any revenue dip could push you into the red. Aim to keep expenses below 75% of revenue.`,
+      action: 'View expense breakdown →',
+      actionFn: "showTabDirect('burn')"
+    });
+  }
+
+  // INFO: Income concentrated (proxy: large single transactions)
+  const largestIncome = Math.max(...transactions.filter(t=>t.type==='income').map(t=>t.amount), 0);
+  if (income > 0 && largestIncome / income > 0.5) {
+    warnings.push({
+      id: 'concentration',
+      level: 'info',
+      icon: '💡',
+      title: 'Revenue concentration risk detected',
+      desc: `One income source makes up over 50% of your revenue this period. Heavy reliance on a single client or stream is a risk factor if that relationship changes.`,
+      action: 'Ask AI about diversifying →',
+      actionFn: "quickPrompt('How do I reduce my revenue concentration risk as a small business?')"
+    });
+  }
+
+  // INFO: Positive cash flow — encouraging
+  if (net > 0 && runway >= 6 && warnings.length === 0) {
+    warnings.push({
+      id: 'healthy',
+      level: 'info',
+      icon: '✅',
+      title: 'Cash flow looks healthy',
+      desc: `Positive net flow of $${net.toLocaleString()} and ${runway.toFixed(1)} months runway. Consider building reserves or reinvesting in growth.`,
+      action: 'Model growth scenarios →',
+      actionFn: "showTabDirect('scenario')"
+    });
+  }
+
+  renderWarnings(warnings);
+}
+
+function getRunwayDate(months) {
+  const d = new Date();
+  d.setMonth(d.getMonth() + Math.floor(months));
+  return 'around ' + d.toLocaleString('default', { month: 'long', year: 'numeric' });
+}
+
+function showTabDirect(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  const navItems = document.querySelectorAll('.nav-item');
+  const tabOrder = ['tracker','forward','burn','scenario','ai'];
+  const idx = tabOrder.indexOf(name);
+  if(idx >= 0) navItems[idx].classList.add('active');
+  if(name === 'forward') runForwardModel();
+  if(name === 'scenario') updateAllScenarios();
+}
+
+function renderWarnings(warnings) {
+  const zone = document.getElementById('warningZone');
+  const bar = document.getElementById('warningSummaryBar');
+  const active = warnings.filter(w => !dismissedWarnings.has(w.id));
+
+  if(active.length === 0) { bar.style.display = 'none'; zone.innerHTML = ''; return; }
+
+  const hasCritical = active.some(w => w.level === 'critical');
+  const hasWarn = active.some(w => w.level === 'warn');
+  const topLevel = hasCritical ? 'critical' : hasWarn ? 'warn' : 'info';
+  const colors = { critical: '#ef4444', warn: '#f59e0b', info: '#3b82f6' };
+  const labels = { critical: `${active.filter(w=>w.level==='critical').length} critical alert${active.filter(w=>w.level==='critical').length>1?'s':''}`, warn: 'cash flow warnings', info: 'cash flow insights' };
+
+  bar.style.display = 'flex';
+  document.getElementById('wsbDot').style.background = colors[topLevel];
+  document.getElementById('wsbLabel').textContent = hasCritical
+    ? `${active.filter(w=>w.level==='critical').length} critical cash shortage alert${active.filter(w=>w.level==='critical').length>1?'s':''}`
+    : hasWarn ? `${active.filter(w=>w.level==='warn').length} cash flow warning${active.filter(w=>w.level==='warn').length>1?'s':''}`
+    : `${active.length} cash flow insight${active.length>1?'s':''}`;
+  document.getElementById('wsbCount').textContent = active.length + ' total';
+  document.getElementById('wsbChevron').classList.toggle('open', warningsOpen);
+
+  zone.style.display = warningsOpen ? 'block' : 'none';
+  zone.innerHTML = active.map(w => `
+    <div class="warning-banner ${w.level}" id="wb-${w.id}">
+      <div class="wb-icon">${w.icon}</div>
+      <div class="wb-body">
+        <div class="wb-title">${w.title}</div>
+        <div class="wb-desc">${w.desc}</div>
+        ${w.action ? `<div class="wb-action" onclick="${w.actionFn}">${w.action}</div>` : ''}
+      </div>
+      <button class="wb-dismiss" onclick="dismissWarning('${w.id}')" title="Dismiss">✕</button>
+    </div>
+  `).join('');
+}
+
+function dismissWarning(id) {
+  dismissedWarnings.add(id);
+  const el = document.getElementById('wb-' + id);
+  if(el) { el.style.opacity = '0'; el.style.transform = 'translateY(-4px)'; el.style.transition = 'all 0.2s'; setTimeout(()=>el.remove(), 200); }
+  const remaining = document.querySelectorAll('.warning-banner').length - 1;
+  if(remaining === 0) { document.getElementById('warningSummaryBar').style.display = 'none'; }
+  else { document.getElementById('wsbCount').textContent = remaining + ' total'; }
+}
+
+// === CHARTS ===
+const months = ['Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May'];
+const incomeData = [24000,26500,25200,28100,29500,27800,31000,28500,30200,29800,31000,31450];
+const expenseData = [19800,20100,21000,19500,22000,20800,21500,22800,21000,22500,21800,22180];
+
+let flowChartInst, expenseDonutInst, burnChartInst, forwardChartInst, scenarioChartInst;
+
+function initCharts() {
+  const netData = incomeData.map((v,i) => v - expenseData[i]);
+
+  flowChartInst = new Chart(document.getElementById('flowChart'), {
+    type:'bar',
+    data:{
+      labels: months,
+      datasets:[
+        { label:'Income', data:incomeData, backgroundColor:'rgba(0,229,160,0.35)', borderColor:'#00e5a0', borderWidth:1.5, borderRadius:4 },
+        { label:'Expenses', data:expenseData, backgroundColor:'rgba(239,68,68,0.25)', borderColor:'#ef4444', borderWidth:1.5, borderRadius:4 },
+        { type:'line', label:'Net', data:netData, borderColor:'#3b82f6', borderWidth:2, pointRadius:3, fill:false, tension:0.4 }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ ticks:{color:'#6b7280',font:{size:11}}, grid:{color:'rgba(255,255,255,0.04)'} },
+        y:{ ticks:{color:'#6b7280',font:{size:11},callback:v=>'$'+(v/1000).toFixed(0)+'K'}, grid:{color:'rgba(255,255,255,0.04)'} }
+      }
+    }
+  });
+
+  expenseDonutInst = new Chart(document.getElementById('expenseDonut'), {
+    type:'doughnut',
+    data:{
+      labels:['Payroll','Operations','Marketing','Software','Other'],
+      datasets:[{ data:[42,23,18,11,6], backgroundColor:['#3b82f6','#8b5cf6','#f59e0b','#ef4444','#10b981'], borderWidth:0, hoverBorderWidth:0 }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, cutout:'65%' }
+  });
+
+  burnChartInst = new Chart(document.getElementById('burnChart'), {
+    type:'line',
+    data:{
+      labels:['Dec','Jan','Feb','Mar','Apr','May'],
+      datasets:[
+        { label:'Gross Burn', data:[20800,21500,22800,21000,21800,22180], borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.1)', fill:true, tension:0.4, borderWidth:2, pointRadius:3 },
+        { label:'Net Burn', data:[9800,10500,11800,10000,10800,12910], borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.08)', fill:true, tension:0.4, borderWidth:2, pointRadius:3, borderDash:[4,4] }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ ticks:{color:'#6b7280',font:{size:11}}, grid:{color:'rgba(255,255,255,0.04)'} },
+        y:{ ticks:{color:'#6b7280',font:{size:11},callback:v=>'$'+(v/1000).toFixed(0)+'K'}, grid:{color:'rgba(255,255,255,0.04)'} }
+      }
+    }
+  });
+}
+
+// === FORWARD MODEL ===
+function runForwardModel() {
+  const cash = parseFloat(document.getElementById('fwdCash').value) || 48320;
+  const rev = parseFloat(document.getElementById('fwdRevenue').value) || 31450;
+  const exp = parseFloat(document.getElementById('fwdExpenses').value) || 22180;
+  const growth = parseFloat(document.getElementById('fwdGrowth').value) || 3;
+
+  const labels = ['Now'];
+  const cashPos = [cash];
+  let curCash = cash, curRev = rev, curExp = exp;
+
+  for(let i=1;i<=12;i++){
+    curRev *= (1 + growth/100);
+    curExp *= 1.01;
+    curCash += curRev - curExp;
+    labels.push(['Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May'][i-1]);
+    cashPos.push(Math.round(curCash));
+  }
+
+  document.getElementById('proj3mo').textContent = '$' + cashPos[3].toLocaleString();
+  document.getElementById('proj6mo').textContent = '$' + cashPos[6].toLocaleString();
+  document.getElementById('proj12mo').textContent = '$' + cashPos[12].toLocaleString();
+
+  const breakEvenIdx = cashPos.findIndex((v,i)=>i>0 && v <= 0);
+  document.getElementById('projBreak').textContent = breakEvenIdx > 0 ? 'Month ' + breakEvenIdx : 'None ✓';
+
+  const insight = cashPos[12] > cashPos[0]
+    ? `Strong outlook — your cash position grows by $${(cashPos[12]-cashPos[0]).toLocaleString()} over 12 months at ${growth}% monthly revenue growth. Expenses remain manageable.`
+    : `Warning: at current growth rate, cash turns negative. Consider increasing revenue or cutting expenses.`;
+  document.getElementById('forwardInsight').textContent = insight;
+
+  const upper = cashPos.map(v => Math.round(v * 1.15));
+  const lower = cashPos.map(v => Math.round(v * 0.85));
+
+  if(forwardChartInst) forwardChartInst.destroy();
+  forwardChartInst = new Chart(document.getElementById('forwardChart'), {
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        { label:'Upper bound', data:upper, borderColor:'rgba(0,229,160,0.2)', backgroundColor:'rgba(0,229,160,0.07)', fill:'+1', tension:0.4, borderWidth:1, pointRadius:0 },
+        { label:'Cash position', data:cashPos, borderColor:'#00e5a0', backgroundColor:'rgba(0,229,160,0.1)', fill:false, tension:0.4, borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#00e5a0' },
+        { label:'Lower bound', data:lower, borderColor:'rgba(0,229,160,0.2)', backgroundColor:'rgba(0,229,160,0.07)', fill:'-1', tension:0.4, borderWidth:1, pointRadius:0 }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{ ticks:{color:'#6b7280',font:{size:11}}, grid:{color:'rgba(255,255,255,0.04)'} },
+        y:{ ticks:{color:'#6b7280',font:{size:11},callback:v=>'$'+(v/1000).toFixed(0)+'K'}, grid:{color:'rgba(255,255,255,0.04)'} }
+      }
+    }
+  });
+}
+
+// === SCENARIO PLANNING ===
+const scenarioState = {
+  best: {rev:25, exp:5, cust:12, one:0},
+  base: {rev:8, exp:3, cust:4, one:0},
+  worst: {rev:-20, exp:15, cust:-8, one:0},
+  custom: {rev:15, exp:20, cust:4, one:10}
+};
+
+function updateScenario(scenario, key, val) {
+  scenarioState[scenario][key] = parseFloat(val);
+  const labels = {rev:'RevVal',exp:'ExpVal',cust:'CustVal',one:'OneVal'};
+  const lk = labels[key];
+  if(!lk) return;
+  const el = document.getElementById(scenario + lk);
+  if(el) {
+    if(key === 'one') el.textContent = (val >= 0 ? '+$' : '-$') + Math.abs(val) + 'K';
+    else if(key === 'cust') el.textContent = (val >= 0 ? '+' : '') + val;
+    else el.textContent = (val >= 0 ? '+' : '') + val + '%';
+  }
+  updateAllScenarios();
+}
+
+function calcScenario(scenario) {
+  const s = scenarioState[scenario];
+  const baseCash = 48320, baseRev = 31450, baseExp = 22180;
+  const rev = baseRev * (1 + s.rev/100);
+  const exp = baseExp * (1 + s.exp/100);
+  const net = rev - exp;
+  const oneTime = (s.one || 0) * 1000;
+  const cash12 = baseCash + net * 12 + oneTime;
+  const runway = cash12 > 0 ? (cash12 / exp).toFixed(1) + ' mo' : '< 0';
+  return { cash12: Math.round(cash12), runway, net, rev, exp };
+}
+
+function updateAllScenarios() {
+  const scenarios = ['best','base','worst','custom'];
+  const colors = ['#00e5a0','#3b82f6','#ef4444','#8b5cf6'];
+  const seriesData = [];
+
+  scenarios.forEach((s,i) => {
+    const r = calcScenario(s);
+    document.getElementById(s+'Result').textContent = '$' + r.cash12.toLocaleString();
+    document.getElementById(s+'Runway').textContent = r.runway;
+
+    // Build monthly series
+    const baseCash = 48320;
+    const monthly = [baseCash];
+    let cur = baseCash;
+    for(let m=1;m<=12;m++) {
+      cur += r.net;
+      if(m===6 && scenarioState[s].one) cur += scenarioState[s].one * 1000;
+      monthly.push(Math.round(cur));
+    }
+    seriesData.push({ label: s.charAt(0).toUpperCase()+s.slice(1), data: monthly, borderColor: colors[i], borderWidth: 2, tension: 0.4, pointRadius: 2, fill: false });
+  });
+
+  const labels = ['Now','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May'];
+  if(scenarioChartInst) scenarioChartInst.destroy();
+  scenarioChartInst = new Chart(document.getElementById('scenarioChart'), {
+    data:{ labels, datasets: seriesData },
+    options:{
+      type:'line',
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ ticks:{color:'#6b7280',font:{size:11}}, grid:{color:'rgba(255,255,255,0.04)'} },
+        y:{ ticks:{color:'#6b7280',font:{size:11},callback:v=>'$'+(v/1000).toFixed(0)+'K'}, grid:{color:'rgba(255,255,255,0.04)'} }
+      }
+    }
+  });
+}
+
+// === AI ADVISOR ===
+async function sendAIMessage() {
+  const input = document.getElementById('aiUserInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  input.value = '';
+
+  const msgs = document.getElementById('aiMessages');
+  const userDiv = document.createElement('div');
+  userDiv.style.cssText = 'background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:13px;line-height:1.6;color:var(--muted);text-align:right';
+  userDiv.textContent = msg;
+  msgs.appendChild(userDiv);
+
+  const thinkDiv = document.createElement('div');
+  thinkDiv.className = 'ai-thinking';
+  thinkDiv.innerHTML = '<span style="color:var(--accent);font-size:12px">✦</span> <div class="dot-flashing"><span></span><span></span><span></span></div>';
+  msgs.appendChild(thinkDiv);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  try {
+    const businessContext = `You are CashLens, an AI cash flow advisor for a small business. 
+    Current business stats: Cash on hand $48,320. Monthly revenue $31,450. Monthly expenses $22,180. 
+    Net cash flow +$9,270/month. Burn rate $22,180/month gross. Runway 3.7 months. 
+    Growth rate ~3%/month. Top expenses: Payroll 42%, Operations 23%, Marketing 18%, Software 11%.
+    Be concise, specific, and action-oriented. Give 2-3 concrete recommendations.`;
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: businessContext,
+        messages: [{ role: "user", content: msg }]
+      })
+    });
+
+    const data = await response.json();
+    thinkDiv.remove();
+
+    const aiText = data.content?.[0]?.text || "I couldn't analyze that right now. Please try again.";
+    const aiDiv = document.createElement('div');
+    aiDiv.className = 'ai-msg';
+
+    const tagType = aiText.toLowerCase().includes('warn') || aiText.toLowerCase().includes('risk') ? 'tag-warn'
+      : aiText.toLowerCase().includes('cut') || aiText.toLowerCase().includes('reduc') ? 'tag-alert'
+      : 'tag-info';
+    const tagLabel = tagType === 'tag-warn' ? 'RISK' : tagType === 'tag-alert' ? 'ADVISORY' : 'ANALYSIS';
+
+    aiDiv.innerHTML = `<div class="tag ${tagType}">${tagLabel}</div><br>${aiText}`;
+    msgs.appendChild(aiDiv);
+    msgs.scrollTop = msgs.scrollHeight;
+  } catch(err) {
+    thinkDiv.remove();
+    const errDiv = document.createElement('div');
+    errDiv.className = 'ai-msg';
+    errDiv.innerHTML = '<div class="tag tag-warn">OFFLINE</div><br>AI advisor is temporarily unavailable. Your business metrics are still live above.';
+    msgs.appendChild(errDiv);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+}
+
+function quickPrompt(text) {
+  showTab('ai');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item')[4].classList.add('active');
+  document.getElementById('aiUserInput').value = text;
+  sendAIMessage();
+}
+
+function analyzeWithAI() {
+  quickPrompt('Give me a full cash flow health check based on my current numbers and top 3 recommendations.');
+}
+
+
+// === ADD ENTRY MODAL ===
+let currentTxType = 'income';
+
+function openAddModal() {
+  const modal = document.getElementById('addModal');
+  modal.style.display = 'flex';
+  document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('txAmount').value = '';
+  document.getElementById('txDesc').value = '';
+  document.getElementById('txCat').value = 'Revenue';
+  setTxType('income');
+  setTimeout(() => document.getElementById('txDesc').focus(), 100);
+}
+
+function closeAddModal() {
+  document.getElementById('addModal').style.display = 'none';
+}
+
+function setTxType(type) {
+  currentTxType = type;
+  const iBtn = document.getElementById('typeIncome');
+  const eBtn = document.getElementById('typeExpense');
+  iBtn.className = type === 'income' ? 'active-income' : '';
+  eBtn.className = type === 'expense' ? 'active-expense' : '';
+  // Update category options based on type
+  const cat = document.getElementById('txCat');
+  if(type === 'income') {
+    cat.innerHTML = '<option>Revenue</option><option>Consulting</option><option>Investment</option><option>Grant</option><option>Loan</option><option>Other Income</option>';
+  } else {
+    cat.innerHTML = '<option>Payroll</option><option>Operations</option><option>Marketing</option><option>Software</option><option>Rent</option><option>Tax</option><option>Supplies</option><option>Travel</option><option>Other</option>';
+  }
+}
+
+function submitAddModal() {
+  const date = document.getElementById('txDate').value;
+  const amount = parseFloat(document.getElementById('txAmount').value);
+  const desc = document.getElementById('txDesc').value.trim();
+  const cat = document.getElementById('txCat').value;
+
+  if(!date) { alert('Please select a date.'); return; }
+  if(!amount || amount <= 0) { alert('Please enter a valid amount.'); return; }
+  if(!desc) { alert('Please enter a description.'); return; }
+
+  const tx = {
+    date,
+    desc,
+    cat,
+    type: currentTxType,
+    amount: currentTxType === 'income' ? amount : -amount
+  };
+  transactions.unshift(tx);
+  renderTransactions();
+  updateMetrics();
+  closeAddModal();
+
+  // Flash the relevant metric card
+  const cardId = currentTxType === 'income' ? 'monthlyIn' : 'monthlyOut';
+  const card = document.getElementById(cardId).closest('.metric-card');
+  card.classList.add('flashing');
+  setTimeout(() => card.classList.remove('flashing'), 3500);
+}
+
+// Allow Enter key to submit
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') { closeAddModal(); closeImportModal(); }
+});
+
+// === IMPORT MODAL ===
+let csvParsedData = null;
+let csvHeaders = [];
+
+function openImportModal() {
+  document.getElementById('importModal').style.display = 'flex';
+  switchImportTab('csv');
+  csvParsedData = null;
+  document.getElementById('colMapSection').style.display = 'none';
+  document.getElementById('csvStatus').innerHTML = '';
+  document.getElementById('importConfirmBtn').style.display = 'none';
+  document.getElementById('dropZone').classList.remove('dragging');
+}
+
+function closeImportModal() {
+  document.getElementById('importModal').style.display = 'none';
+}
+
+function switchImportTab(tab) {
+  ['csv','sheets','info'].forEach(t => {
+    document.getElementById('itab-' + t).classList.toggle('active', t === tab);
+    document.getElementById('importPane-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  document.getElementById('importConfirmBtn').style.display = tab === 'csv' && csvParsedData ? 'block' : 'none';
+}
+
+// CSV HANDLING
+function handleCsvDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('dragging');
+  const file = e.dataTransfer.files[0];
+  if(file && file.name.endsWith('.csv')) handleCsvFile(file);
+  else showCsvStatus('Please drop a .csv file.', 'err');
+}
+
+function handleCsvFile(file) {
+  if(!file) return;
+  showCsvStatus('Reading file...', 'loading');
+  const reader = new FileReader();
+  reader.onload = e => parseCsv(e.target.result, file.name);
+  reader.readAsText(file);
+}
+
+function parseCsv(text, filename) {
+  const lines = text.trim().split('\n').filter(l => l.trim());
+  if(lines.length < 2) { showCsvStatus('File appears empty or has only headers.', 'err'); return; }
+
+  // Parse headers
+  csvHeaders = lines[0].split(',').map(h => h.replace(/"/g,'').trim());
+  const rows = lines.slice(1).map(line => {
+    const vals = line.match(/(".*?"|[^,]+)(?=,|$)/g) || line.split(',');
+    return vals.map(v => v.replace(/"/g,'').trim());
+  }).filter(r => r.some(v => v));
+
+  csvParsedData = rows;
+
+  // Auto-detect columns
+  const lower = csvHeaders.map(h => h.toLowerCase());
+  const findCol = (...keys) => {
+    for(const k of keys) { const i = lower.findIndex(h => h.includes(k)); if(i >= 0) return csvHeaders[i]; }
+    return csvHeaders[0];
+  };
+
+  // Populate selects
+  ['mapDate','mapDesc','mapAmount','mapCat'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = csvHeaders.map(h => `<option>${h}</option>`).join('');
+  });
+  document.getElementById('mapType').innerHTML = `<option value="auto">Auto-detect (positive=income, negative=expense)</option>${csvHeaders.map(h=>`<option>${h}</option>`).join('')}`;
+
+  document.getElementById('mapDate').value = findCol('date','time','when');
+  document.getElementById('mapDesc').value = findCol('desc','name','memo','narrat','detail','payee');
+  document.getElementById('mapAmount').value = findCol('amount','total','sum','value','debit','credit');
+
+  const catCol = csvHeaders.find(h => /cat|type|class|group/i.test(h));
+  if(catCol) document.getElementById('mapCat').value = catCol;
+
+  document.getElementById('colMapSection').style.display = 'block';
+  document.getElementById('importConfirmBtn').style.display = 'block';
+  document.getElementById('csvPreviewInfo').textContent = `✓ Detected ${rows.length} transactions from "${filename}" — review column mapping below then click Import`;
+  document.getElementById('csvPreviewInfo').className = 'import-status ok';
+  showCsvStatus('', '');
+}
+
+function showCsvStatus(msg, type) {
+  const el = document.getElementById('csvStatus');
+  el.textContent = msg;
+  el.className = msg ? 'import-status ' + type : '';
+}
+
+function confirmCsvImport() {
+  if(!csvParsedData) return;
+  const dateCol = document.getElementById('mapDate').value;
+  const descCol = document.getElementById('mapDesc').value;
+  const amtCol  = document.getElementById('mapAmount').value;
+  const typeCol = document.getElementById('mapType').value;
+  const catCol  = document.getElementById('mapCat').value;
+
+  const di = csvHeaders.indexOf(dateCol);
+  const desi = csvHeaders.indexOf(descCol);
+  const ai = csvHeaders.indexOf(amtCol);
+  const ti = typeCol === 'auto' ? -1 : csvHeaders.indexOf(typeCol);
+  const ci = catCol === 'none' ? -1 : csvHeaders.indexOf(catCol);
+
+  let imported = 0, skipped = 0;
+  csvParsedData.forEach(row => {
+    const rawAmt = parseFloat((row[ai]||'0').replace(/[$,\s]/g,''));
+    if(isNaN(rawAmt) || rawAmt === 0) { skipped++; return; }
+
+    let type;
+    if(ti >= 0) {
+      const tv = (row[ti]||'').toLowerCase();
+      type = /income|credit|deposit|receive|sale/i.test(tv) ? 'income' : 'expense';
+    } else {
+      type = rawAmt >= 0 ? 'income' : 'expense';
+    }
+
+    const amount = type === 'income' ? Math.abs(rawAmt) : -Math.abs(rawAmt);
+    const rawDate = row[di] || new Date().toISOString().split('T')[0];
+    const parsedDate = parseFlexDate(rawDate);
+
+    transactions.push({
+      date: parsedDate,
+      desc: row[desi] || 'Imported transaction',
+      cat: ci >= 0 ? (row[ci] || 'Other') : (type === 'income' ? 'Revenue' : 'Other'),
+      type,
+      amount
+    });
+    imported++;
+  });
+
+  // Sort by date desc
+  transactions.sort((a,b) => b.date.localeCompare(a.date));
+  renderTransactions();
+  updateMetrics();
+  closeImportModal();
+
+  // Show quick confirmation in tracker
+  const bar = document.getElementById('warningSummaryBar');
+  const tempMsg = document.createElement('div');
+  tempMsg.className = 'import-status ok';
+  tempMsg.style.cssText = 'margin-bottom:12px;padding:10px 14px;border-radius:10px;font-size:13px';
+  tempMsg.textContent = `✓ Imported ${imported} transactions${skipped ? ` (${skipped} skipped)` : ''} from CSV`;
+  document.getElementById('warningZone').insertAdjacentElement('afterend', tempMsg);
+  setTimeout(() => tempMsg.remove(), 4000);
+}
+
+function parseFlexDate(str) {
+  // Handle MM/DD/YYYY, DD-MM-YYYY, YYYY-MM-DD, etc.
+  str = str.trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  const d = new Date(str);
+  if(!isNaN(d)) return d.toISOString().split('T')[0];
+  return new Date().toISOString().split('T')[0];
+}
+
+// GOOGLE SHEETS IMPORT
+async function importFromSheets() {
+  const url = document.getElementById('sheetsUrl').value.trim();
+  const statusEl = document.getElementById('sheetsStatus');
+  if(!url) { statusEl.innerHTML = '<div class="import-status err">Please paste a Google Sheets URL.</div>'; return; }
+
+  // Extract sheet ID
+  const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  if(!match) { statusEl.innerHTML = '<div class="import-status err">That doesn\'t look like a valid Google Sheets URL. Make sure you copy the full link.</div>'; return; }
+
+  const sheetId = match[1];
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+
+  statusEl.innerHTML = '<div class="import-status loading">⟳ Connecting to Google Sheets...</div>';
+
+  try {
+    const res = await fetch(csvUrl);
+    if(!res.ok) throw new Error('Could not fetch sheet. Make sure it\'s set to "Anyone with the link can view".');
+    const text = await res.text();
+
+    if(text.includes('<!DOCTYPE')) throw new Error('Sheet is not publicly accessible. Set sharing to "Anyone with the link → Viewer".');
+
+    parseCsv(text, 'Google Sheet');
+    switchImportTab('csv');
+    statusEl.innerHTML = '';
+  } catch(err) {
+    statusEl.innerHTML = `<div class="import-status err">⚠ ${err.message}</div>`;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderTransactions();
+  initCharts();
+  updateAllScenarios();
+  runForwardModel();
+  updateMetrics();
+});
+</script>
+</body>
+</html>
