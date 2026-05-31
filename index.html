@@ -1987,10 +1987,10 @@ function initCharts() {
 
 // === FORWARD MODEL ===
 function runForwardModel() {
-  const cash = parseFloat(document.getElementById('fwdCash').value) || 48320;
-  const rev = parseFloat(document.getElementById('fwdRevenue').value) || 31450;
-  const exp = parseFloat(document.getElementById('fwdExpenses').value) || 22180;
-  const growth = parseFloat(document.getElementById('fwdGrowth').value) || 3;
+  const cash   = parseFloat(document.getElementById('fwdCash').value)     || 0;
+  const rev    = parseFloat(document.getElementById('fwdRevenue').value)   || 0;
+  const exp    = parseFloat(document.getElementById('fwdExpenses').value)  || 0;
+  const growth = parseFloat(document.getElementById('fwdGrowth').value)    || 0;
 
   const labels = ['Now'];
   const cashPos = [cash];
