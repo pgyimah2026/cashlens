@@ -1667,7 +1667,10 @@ function showTab(name) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   event.currentTarget.classList.add('active');
+  // Rebuild charts/data for the tab that just became visible
+  if(name === 'tracker')     updateFlowChart();
   if(name === 'forward')     runForwardModel();
+  if(name === 'burn')        { updateBurnRateTab(); updateBurnChart(); }
   if(name === 'scenario')    updateAllScenarios();
   if(name === 'receivables') updateReceivablesSummary();
 }
@@ -1963,6 +1966,8 @@ function initCharts() {
 }
 
 function updateFlowChart() {
+  const tab = document.getElementById('tab-tracker');
+  if (!tab || !tab.classList.contains('active')) { if (flowChartInst) { flowChartInst.destroy(); flowChartInst = null; } return; }
   if (flowChartInst) { flowChartInst.destroy(); flowChartInst = null; }
   const { labels, incomes, expenses } = buildMonthlyData(12);
   const netData = incomes.map((v,i) => v - expenses[i]);
@@ -1988,6 +1993,8 @@ function updateFlowChart() {
 }
 
 function updateBurnChart() {
+  const tab = document.getElementById('tab-burn');
+  if (!tab || !tab.classList.contains('active')) { if (burnChartInst) { burnChartInst.destroy(); burnChartInst = null; } return; }
   if (burnChartInst) { burnChartInst.destroy(); burnChartInst = null; }
   const { labels, incomes, expenses } = buildMonthlyData(6);
   const netBurn = incomes.map((v,i) => Math.max(expenses[i] - v, 0));
@@ -2013,6 +2020,8 @@ function updateBurnChart() {
 
 // === FORWARD MODEL ===
 function runForwardModel() {
+  const tab = document.getElementById('tab-forward');
+  if (!tab || !tab.classList.contains('active')) return;
   const cash   = parseFloat(document.getElementById('fwdCash').value)     || 0;
   const rev    = parseFloat(document.getElementById('fwdRevenue').value)   || 0;
   const exp    = parseFloat(document.getElementById('fwdExpenses').value)  || 0;
@@ -2104,6 +2113,8 @@ function calcScenario(scenario) {
 }
 
 function updateAllScenarios() {
+  const tab = document.getElementById('tab-scenario');
+  if (!tab || !tab.classList.contains('active')) return;
   const scenarios = ['best','base','worst','custom'];
   const colors = ['#00e5a0','#3b82f6','#ef4444','#8b5cf6'];
   const seriesData = [];
