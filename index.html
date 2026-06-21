@@ -1361,7 +1361,7 @@
     <div class="modal-sub">Connect a data source to populate your tracker automatically</div>
 
     <div class="import-tabs">
-      <div class="import-tab active" id="itab-csv" onclick="switchImportTab('csv')">CSV Upload</div>
+      <div class="import-tab active" id="itab-csv" onclick="switchImportTab('csv')">CSV / PDF Upload</div>
       <div class="import-tab" id="itab-sheets" onclick="switchImportTab('sheets')">Google Sheets</div>
       <div class="import-tab" id="itab-info" onclick="switchImportTab('info')">Other Apps</div>
     </div>
@@ -1373,9 +1373,9 @@
            ondragleave="this.classList.remove('dragging')"
            ondrop="handleCsvDrop(event)">
         <div class="drop-zone-icon">📂</div>
-        <div class="drop-zone-label">Drop your CSV here or click to browse</div>
-        <div class="drop-zone-sub">Exports from QuickBooks, Wave, Xero, FreshBooks, or your bank all work</div>
-        <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleCsvFile(this.files[0])">
+        <div class="drop-zone-label">Drop your CSV or PDF statement here or click to browse</div>
+        <div class="drop-zone-sub">QuickBooks, Wave, Xero, FreshBooks CSV exports — or a bank PDF statement, parsed right in your browser</div>
+        <input type="file" id="csvFileInput" accept=".csv,.pdf" style="display:none" onchange="handleCsvFile(this.files[0])">
       </div>
 
       <div id="colMapSection" style="display:none">
@@ -1426,7 +1426,7 @@
         </div>
         <div class="import-info-card" onclick="switchImportTab('csv')" style="padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
           <div style="font-size:13px;font-weight:600;margin-bottom:4px">Bank Statements</div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.5">Most banks let you download transactions as CSV from your account dashboard. CashLens auto-detects debits and credits. <strong style="color:var(--accent)">Click to upload →</strong></div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5">Upload your bank's CSV export, or drop the PDF statement directly — CashLens extracts each transaction and auto-detects debits and credits. Parsed entirely in your browser. <strong style="color:var(--accent)">Click to upload →</strong></div>
         </div>
         <div style="padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);border-left:3px solid var(--purple)">
           <div style="font-size:13px;font-weight:600;margin-bottom:4px">Direct API connections <span style="font-size:10px;color:var(--purple);font-weight:500;margin-left:6px">Coming soon</span></div>
@@ -2724,17 +2724,18 @@ function switchImportTab(tab) {
   document.getElementById('importConfirmBtn').style.display = tab === 'csv' && csvParsedData ? 'block' : 'none';
 }
 
-// CSV HANDLING
+// CSV / PDF HANDLING
 function handleCsvDrop(e) {
   e.preventDefault();
   document.getElementById('dropZone').classList.remove('dragging');
   const file = e.dataTransfer.files[0];
-  if(file && file.name.endsWith('.csv')) handleCsvFile(file);
-  else showCsvStatus('Please drop a .csv file.', 'err');
+  if(file && /\.(csv|pdf)$/i.test(file.name)) handleCsvFile(file);
+  else showCsvStatus('Please drop a .csv or .pdf file.', 'err');
 }
 
 function handleCsvFile(file) {
   if(!file) return;
+  if(/\.pdf$/i.test(file.name)) { handlePdfFile(file); return; }
   showCsvStatus('Reading file...', 'loading');
   const reader = new FileReader();
   reader.onerror = () => showCsvStatus('Could not read file. Try again.', 'err');
@@ -2760,7 +2761,10 @@ function parseCsv(text, filename) {
   }).filter(r => r.some(v => v));
 
   csvParsedData = rows;
+  populateImportPreview(filename);
+}
 
+function populateImportPreview(filename) {
   // Auto-detect columns
   const lower = csvHeaders.map(h => h.toLowerCase());
   const findCol = (...keys) => {
@@ -2769,11 +2773,12 @@ function parseCsv(text, filename) {
   };
 
   // Populate selects
-  ['mapDate','mapDesc','mapAmount','mapCat'].forEach(id => {
+  ['mapDate','mapDesc','mapAmount'].forEach(id => {
     const sel = document.getElementById(id);
     sel.innerHTML = csvHeaders.map(h => `<option>${h}</option>`).join('');
   });
   document.getElementById('mapType').innerHTML = `<option value="auto">Auto-detect (positive=income, negative=expense)</option>${csvHeaders.map(h=>`<option>${h}</option>`).join('')}`;
+  document.getElementById('mapCat').innerHTML = `<option value="none">— none —</option>${csvHeaders.map(h=>`<option>${h}</option>`).join('')}`;
 
   document.getElementById('mapDate').value = findCol('date','time','when');
   document.getElementById('mapDesc').value = findCol('desc','name','memo','narrat','detail','payee');
@@ -2784,9 +2789,137 @@ function parseCsv(text, filename) {
 
   document.getElementById('colMapSection').style.display = 'block';
   document.getElementById('importConfirmBtn').style.display = 'block';
-  document.getElementById('csvPreviewInfo').textContent = `✓ Detected ${rows.length} transactions from "${filename}" — review column mapping below then click Import`;
+  document.getElementById('csvPreviewInfo').textContent = `✓ Detected ${csvParsedData.length} transactions from "${filename}" — review column mapping below then click Import`;
   document.getElementById('csvPreviewInfo').className = 'import-status ok';
   showCsvStatus('', '');
+}
+
+// PDF BANK STATEMENT HANDLING
+let _pdfjsLibPromise = null;
+function loadPdfJs() {
+  if(!_pdfjsLibPromise) {
+    const base = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.149/';
+    _pdfjsLibPromise = import(base + 'pdf.min.mjs').then(lib => {
+      lib.GlobalWorkerOptions.workerSrc = base + 'pdf.worker.min.mjs';
+      return lib;
+    });
+  }
+  return _pdfjsLibPromise;
+}
+
+async function handlePdfFile(file) {
+  showCsvStatus('Reading PDF...', 'loading');
+  try {
+    const buf = await file.arrayBuffer();
+    const pdfjsLib = await loadPdfJs();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    let fullText = '';
+    for(let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += linesFromTextContent(content) + '\n';
+    }
+
+    const rows = parseBankStatementText(fullText);
+    if(!rows.length) {
+      showCsvStatus('Could not detect any transaction lines in this PDF. It may be a scanned image rather than text — try exporting a CSV from your bank instead.', 'err');
+      return;
+    }
+
+    csvHeaders = ['Date', 'Description', 'Amount'];
+    csvParsedData = rows;
+    populateImportPreview(file.name);
+  } catch(err) {
+    showCsvStatus('Could not parse PDF: ' + err.message, 'err');
+  }
+}
+
+// Reassembles PDF.js text items into lines using their y-position (tables have no inherent line breaks)
+function linesFromTextContent(content) {
+  const tol = 2;
+  const sorted = content.items.slice().sort((a, b) => {
+    const ay = a.transform[5], by = b.transform[5];
+    if(Math.abs(ay - by) > tol) return by - ay;
+    return a.transform[4] - b.transform[4];
+  });
+
+  const lines = [];
+  let current = [], currentY = null;
+  sorted.forEach(it => {
+    const y = it.transform[5];
+    if(currentY !== null && Math.abs(y - currentY) <= tol) {
+      current.push(it);
+    } else {
+      if(current.length) lines.push(current);
+      current = [it];
+      currentY = y;
+    }
+  });
+  if(current.length) lines.push(current);
+
+  return lines.map(l => l.map(it => it.str).join(' ').replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n');
+}
+
+// Heuristic line-by-line parser for common bank statement layouts: <date> <description> <amount> [balance]
+function parseBankStatementText(text) {
+  const dateRe = /^(\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?|\d{4}-\d{1,2}-\d{1,2}|[A-Za-z]{3,9}\.?\s+\d{1,2},?\s*\d{0,4}|\d{1,2}\s+[A-Za-z]{3,9}\.?,?\s*\d{0,4})\s+/;
+  const amtRe = /\(?-?\$?\s?[\d,]+\.\d{2}\)?\s*(?:CR|DR)?/i;
+  const incomeHints = /deposit|payroll|direct dep|interest paid|refund|transfer from|incoming wire|cash back rewards|credit memo/i;
+  const expenseHints = /purchase|withdrawal|debit card|^atm\b|check\s*(?:#|no\.?|paid)|payment to|service fee|monthly fee|nsf fee|overdraft|bill ?pay|subscription/i;
+  const sectionIncomeRe = /^deposits?\s*(?:and|&)?\s*additions\b|^credits?\b|^payments?\s*received\b/i;
+  const sectionExpenseRe = /^withdrawals?\b|^debits?\b|^checks?\s*paid\b|^purchases\b|^fees?\b|^electronic withdrawals\b/i;
+  const skipLineRe = /beginning balance|ending balance|opening balance|closing balance|previous balance|new balance|^balance\b|total (?:fees|deposits|withdrawals|payments)|average daily balance/i;
+
+  let sectionType = null;
+  const rows = [];
+
+  text.split('\n').forEach(rawLine => {
+    const line = rawLine.replace(/\s+/g, ' ').trim();
+    if(!line) return;
+
+    if(line.length < 60 && sectionIncomeRe.test(line)) { sectionType = 'income'; return; }
+    if(line.length < 60 && sectionExpenseRe.test(line)) { sectionType = 'expense'; return; }
+    if(skipLineRe.test(line)) return;
+
+    const dm = line.match(dateRe);
+    if(!dm) return;
+    let dateStr = dm[1].trim();
+    const rest = line.slice(dm[0].length).trim();
+    if(!rest) return;
+
+    const am = rest.match(amtRe);
+    if(!am) return;
+
+    const amountStr = am[0];
+    const desc = rest.slice(0, am.index).trim();
+    if(desc.length < 2) return;
+
+    const negative = /^\(.*\)$/.test(amountStr.trim()) || amountStr.trim().startsWith('-');
+    const isCR = /CR\s*$/i.test(amountStr);
+    const isDR = /DR\s*$/i.test(amountStr);
+
+    let type;
+    if(isCR) type = 'income';
+    else if(isDR) type = 'expense';
+    else if(negative) type = 'expense';
+    else if(sectionType) type = sectionType;
+    else if(incomeHints.test(desc)) type = 'income';
+    else if(expenseHints.test(desc)) type = 'expense';
+    else type = 'expense';
+
+    const cleanNum = amountStr.replace(/[\$,\s]/gi, '').replace(/CR|DR/gi, '').replace(/[()\-]/g, '');
+    const num = parseFloat(cleanNum);
+    if(isNaN(num) || num === 0) return;
+
+    // No-year dates default to the current year (statement period isn't extracted)
+    if(/^\d{1,2}[\/\-]\d{1,2}$/.test(dateStr)) dateStr += '/' + new Date().getFullYear();
+    else if(/^[A-Za-z]{3,9}\.?\s+\d{1,2}$/.test(dateStr)) dateStr += ', ' + new Date().getFullYear();
+
+    const signedAmount = type === 'income' ? num : -num;
+    rows.push([dateStr, desc, signedAmount.toFixed(2)]);
+  });
+
+  return rows;
 }
 
 function showCsvStatus(msg, type) {
