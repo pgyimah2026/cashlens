@@ -541,6 +541,9 @@
   .import-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
   .import-tab { padding: 8px 16px; font-size: 13px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.15s; font-weight: 500; }
   .import-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .import-info-card { cursor: pointer; transition: border-color 0.15s, transform 0.1s; }
+  .import-info-card:hover { border-color: var(--accent); }
+  .import-info-card:active { transform: scale(0.99); }
 
   .drop-zone {
     border: 2px dashed var(--border2); border-radius: 12px;
@@ -1413,17 +1416,17 @@
     <!-- INFO TAB -->
     <div id="importPane-info" style="display:none">
       <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
+        <div class="import-info-card" onclick="switchImportTab('csv')" style="padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
           <div style="font-size:13px;font-weight:600;margin-bottom:4px">QuickBooks / Xero / FreshBooks</div>
           <div style="font-size:12px;color:var(--muted);line-height:1.5">Export a transaction report as CSV, then use the CSV Upload tab. Go to Reports → Transaction List → Export → CSV.</div>
         </div>
-        <div style="padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
+        <div class="import-info-card" onclick="switchImportTab('csv')" style="padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
           <div style="font-size:13px;font-weight:600;margin-bottom:4px">Wave Accounting</div>
           <div style="font-size:12px;color:var(--muted);line-height:1.5">Accounting → Transactions → Export → CSV. Then upload via the CSV tab above.</div>
         </div>
-        <div style="padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
+        <div class="import-info-card" onclick="switchImportTab('csv')" style="padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
           <div style="font-size:13px;font-weight:600;margin-bottom:4px">Bank Statements</div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.5">Most banks let you download transactions as CSV from your account dashboard. CashLens auto-detects debits and credits.</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5">Most banks let you download transactions as CSV from your account dashboard. CashLens auto-detects debits and credits. <strong style="color:var(--accent)">Click to upload →</strong></div>
         </div>
         <div style="padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);border-left:3px solid var(--purple)">
           <div style="font-size:13px;font-weight:600;margin-bottom:4px">Direct API connections <span style="font-size:10px;color:var(--purple);font-weight:500;margin-left:6px">Coming soon</span></div>
